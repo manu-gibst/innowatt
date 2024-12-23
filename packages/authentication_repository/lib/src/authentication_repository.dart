@@ -151,11 +151,11 @@ class LogOutFailure implements Exception {}
 /// {@endtemplate}
 class AuthenticationRepository {
   /// {@macro authentication_repository}
-  AuthenticationRepository(
+  AuthenticationRepository({
     CacheClient? cache,
     firebase_auth.FirebaseAuth? firebaseAuth,
     GoogleSignIn? googleSignIn,
-  )   : _cache = cache ?? CacheClient(),
+  })  : _cache = cache ?? CacheClient(),
         _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
         _googleSignIn = googleSignIn ?? GoogleSignIn.standard();
 
@@ -182,6 +182,12 @@ class AuthenticationRepository {
       _cache.write(key: userCacheKey, value: user);
       return user;
     });
+  }
+
+  /// Returns the current cached user.
+  /// Defaults to [User.empty] if there is no cached user.
+  User get currentUser {
+    return _cache.read<User>(key: userCacheKey) ?? User.empty;
   }
 
   /// Creates a new user with the provided [email] and [password].
