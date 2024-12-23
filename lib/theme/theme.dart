@@ -170,6 +170,57 @@ class MaterialTheme {
     return theme(lightHighContrastScheme());
   }
 
+  static ColorScheme customDarkScheme() {
+    return const ColorScheme(
+      brightness: Brightness.dark,
+      primary: Color.fromARGB(255, 188, 101, 61),
+      surfaceTint: Color(0xffffb694),
+      onPrimary: Color(0xff561f00),
+      primaryContainer: Color(0xffb75a28),
+      onPrimaryContainer: Color(0xffffffff),
+      secondary: Color(0xffd0c1db),
+      onSecondary: Color(0xff362c40),
+      secondaryContainer: Color(0xff54495f),
+      onSecondaryContainer: Color(0xfff5e6ff),
+      tertiary: Color(0xffd3c1d5),
+      onTertiary: Color(0xff382c3c),
+      tertiaryContainer: Color(0xff3d3040),
+      onTertiaryContainer: Color(0xffd1bed2),
+      error: Color(0xffffb4ab),
+      onError: Color(0xff690005),
+      errorContainer: Color(0xff93000a),
+      onErrorContainer: Color(0xffffdad6),
+      surface: Color(0xff141313),
+      onSurface: Color(0xffe5e2e1),
+      onSurfaceVariant: Color(0xffcec4c9),
+      outline: Color(0xff978e93),
+      outlineVariant: Color(0xff4b4549),
+      shadow: Color(0xff000000),
+      scrim: Color(0xff000000),
+      inverseSurface: Color(0xffe5e2e1),
+      inversePrimary: Color(0xff9b4513),
+      primaryFixed: Color(0xffffdbcc),
+      onPrimaryFixed: Color(0xff351000),
+      primaryFixedDim: Color(0xffffb694),
+      onPrimaryFixedVariant: Color(0xff7a2f00),
+      secondaryFixed: Color(0xffecddf8),
+      onSecondaryFixed: Color(0xff20182b),
+      secondaryFixedDim: Color(0xffd0c1db),
+      onSecondaryFixedVariant: Color(0xff4d4358),
+      tertiaryFixed: Color(0xfff0dcf1),
+      onTertiaryFixed: Color(0xff231826),
+      tertiaryFixedDim: Color(0xffd3c1d5),
+      onTertiaryFixedVariant: Color(0xff504253),
+      surfaceDim: Color(0xff141313),
+      surfaceBright: Color(0xff3a3939),
+      surfaceContainerLowest: Color(0xff0f0e0e),
+      surfaceContainerLow: Color(0xff1c1b1b),
+      surfaceContainer: Color(0xff201f1f),
+      surfaceContainerHigh: Color(0xff2b2a2a),
+      surfaceContainerHighest: Color(0xff363434),
+    );
+  }
+
   static ColorScheme darkScheme() {
     return const ColorScheme(
       brightness: Brightness.dark,
@@ -222,7 +273,7 @@ class MaterialTheme {
   }
 
   ThemeData dark() {
-    return theme(darkScheme());
+    return theme(customDarkScheme());
   }
 
   static ColorScheme darkMediumContrastScheme() {

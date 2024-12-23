@@ -52,7 +52,7 @@ class _LoginViewState extends State<LoginView> {
               Expanded(
                 child: MyText(
                   text: "Charge your business with InnoWatt!",
-                  color: Theme.of(context).colorScheme.primaryContainer,
+                  color: Theme.of(context).colorScheme.primary,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
