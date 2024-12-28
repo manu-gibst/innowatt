@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "682609745797",
+    "project_id": "innowatt-app",
+    "storage_bucket": "innowatt-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:682609745797:android:f287b08108b0770db46eec",
+        "android_client_info": {
+          "package_name": "com.atozdecisions.innowatt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "682609745797-io4d006tai857pg20jmrr7l61ni6e2ie.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.atozdecisions.innowatt",
+            "certificate_hash": "02b898c6def07aada412f88ddbd135944c93c3d1"
+          }
+        },
+        {
+          "client_id": "682609745797-hp8ioltpnir2jsc6p00lfdd5d1gfgdek.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5Bsbha_1dE06IQi05Pjd7FA0MsAsk87g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "682609745797-hp8ioltpnir2jsc6p00lfdd5d1gfgdek.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "682609745797-e6jv66qprhltlkfp6m0d99akkr5i1bf7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.atozdecisions.innowatt"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

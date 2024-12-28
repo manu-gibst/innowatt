@@ -1,68 +1,19 @@
-// import 'package:bloc/bloc.dart';
+import 'package:authentication_repository/authentication_repository.dart';
+import 'package:bloc/bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:innowatt/constants/routes.dart';
-import 'package:innowatt/services/auth/auth_service.dart';
-import 'package:innowatt/theme/theme.dart';
-import 'package:innowatt/theme/util.dart';
-import 'package:innowatt/views/chats/all_chats_view.dart';
-import 'package:innowatt/views/chats/create_new_chat.dart';
-import 'package:innowatt/views/login_view.dart';
-import 'package:innowatt/views/register_view.dart';
-import 'package:innowatt/views/verify_email_view.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:innowatt/app/bloc_observer.dart';
+import 'package:innowatt/app/view/app.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  Bloc.observer = const AppBlocObserver();
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    // final brightness = View.of(context).platformDispatcher.platformBrightness;
+  await Firebase.initializeApp();
 
-    TextTheme textTheme = createTextTheme(context, "Montserrat", "Montserrat");
+  final authenticationRepository = AuthenticationRepository();
+  await authenticationRepository.user.first;
 
-    MaterialTheme theme = MaterialTheme(textTheme);
-    return MaterialApp(
-      title: 'Innowatt',
-      theme: theme.dark(),
-      home: const HomePage(),
-      routes: {
-        // loginRoute: (context) => const LoginView(),
-        loginRoute: (context) => const LoginView(),
-        registerRoute: (context) => const RegisterView(),
-        chatsListViewRoute: (context) => const AllChatsView(),
-        createNewChatRoute: (context) => const CreateNewChat(),
-        verifyEmailRoute: (context) => const VerifyEmailView(),
-      },
-    );
-  }
-}
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: AuthService.firebase().initialize(),
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.done:
-            final user = AuthService.firebase().currentUser;
-            if (user != null) {
-              if (user.isEmailVerified) {
-                return const AllChatsView();
-              } else {
-                return const VerifyEmailView();
-              }
-            } else {
-              return const LoginView();
-            }
-          default:
-            return const CircularProgressIndicator();
-        }
-      },
-    );
-  }
+  runApp(App(authenticationRepository: authenticationRepository));
 }

@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"innowatt-app","appId":"1:682609745797:android:f287b08108b0770db46eec","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"innowatt-app","configurations":{"android":"1:682609745797:android:f287b08108b0770db46eec","ios":"1:682609745797:ios:f7a4674a7d9de43fb46eec"}}}}}}
