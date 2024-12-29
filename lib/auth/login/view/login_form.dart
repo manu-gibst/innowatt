@@ -4,13 +4,14 @@ import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/constants/image_routes.dart';
-import 'package:innowatt/login/cubit/login_cubit.dart';
+import 'package:innowatt/auth/login/cubit/login_cubit.dart';
 
 class LoginForm extends StatelessWidget {
   const LoginForm({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return BlocListener<LoginCubit, LoginState>(
       listener: (context, state) {
         if (state.status.isFailure) {
@@ -24,14 +25,31 @@ class LoginForm extends StatelessWidget {
         }
       },
       child: Align(
-        alignment: const Alignment(0, -1 / 3),
+        alignment: const Alignment(0, 0),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset(
-                logoImage,
-                height: 120,
+              Row(
+                children: [
+                  Image.asset(
+                    logoImage,
+                    height: 180,
+                  ),
+                  Expanded(
+                    child: Text(
+                      "Charge your business with InnoWatt!",
+                      overflow: TextOverflow.clip,
+                      softWrap: true,
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: "Montserrat",
+                        fontSize: 32,
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               _EmailInput(),
@@ -60,9 +78,10 @@ class _EmailInput extends StatelessWidget {
       onChanged: (email) => context.read<LoginCubit>().emailChanged(email),
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
+        border: OutlineInputBorder(),
         labelText: 'email',
         helperText: '',
-        errorText: displayError != null ? 'invalid email' : null,
+        errorText: displayError?.text(),
       ),
     );
   }
@@ -80,9 +99,11 @@ class _PasswordInput extends StatelessWidget {
           context.read<LoginCubit>().passwordChanged(password),
       obscureText: true,
       decoration: InputDecoration(
+        border: OutlineInputBorder(),
         labelText: 'password',
         helperText: '',
-        errorText: displayError != null ? 'invalid password' : null,
+        errorText: displayError?.text(),
+        errorStyle: TextStyle(overflow: TextOverflow.fade),
       ),
     );
   }
@@ -99,20 +120,31 @@ class _LoginButton extends StatelessWidget {
       (LoginCubit cubit) => cubit.state.isValid,
     );
 
+    final colorScheme = Theme.of(context).colorScheme;
     return ElevatedButton(
       key: const Key('loginForm_continue_raisedButton'),
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(10),
         ),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: colorScheme.primaryContainer,
+        foregroundColor: colorScheme.onPrimaryContainer,
       ),
       onPressed: isValid
           ? () => context.read<LoginCubit>().logInWithCredentials()
           : null,
-      child: !isInProgress
-          ? const Text('LOGIN')
-          : const CircularProgressIndicator(),
+      child: Padding(
+        padding: EdgeInsets.all(18),
+        child: Center(
+          child: !isInProgress
+              ? const Text('LOGIN')
+              : SizedBox(
+                  height: 18,
+                  width: 18,
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+        ),
+      ),
     );
   }
 }
@@ -137,13 +169,13 @@ class _GoogleLoginButton extends StatelessWidget {
 class _SignUpButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     return TextButton(
       key: const Key('loginForm_createAccount_flatButton'),
-      onPressed: () => context.push(Routes.signUp),
+      onPressed: () => GoRouter.of(context).push(Routes.signUp),
       child: Text(
         'CREATE ACCOUNT',
-        style: TextStyle(color: theme.colorScheme.onSecondary),
+        style: TextStyle(color: colorScheme.secondaryContainer),
       ),
     );
   }

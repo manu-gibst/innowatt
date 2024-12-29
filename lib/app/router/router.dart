@@ -1,20 +1,21 @@
 import 'dart:async';
 
-import 'package:authentication_repository/authentication_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innowatt/app/bloc/app_bloc.dart';
 import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/app/view/app.dart';
-import 'package:innowatt/login/view/login_page.dart';
-import 'package:innowatt/sign_up/view/sign_up_page.dart';
+import 'package:innowatt/auth/login/view/login_page.dart';
+import 'package:innowatt/auth/sign_up/view/sign_up_page.dart';
+import 'package:innowatt/chat/view/all_chats_view.dart';
+import 'package:innowatt/chat/view/create_new_chat.dart';
 part 'scaffold_with_navbar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
 
-GoRouter router(Stream<dynamic> stream) {
+GoRouter router(AppBloc bloc) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: Routes.login,
@@ -35,8 +36,20 @@ GoRouter router(Stream<dynamic> stream) {
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
+                builder: (context, state) => const AllChatsView(),
+                path: Routes.chatRoutes.allChats,
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: <RouteBase>[
+              GoRoute(
                 builder: (context, state) => const HomePage(),
                 path: Routes.home,
+              ),
+              GoRoute(
+                builder: (context, state) => const CreateNewChat(),
+                path: Routes.chatRoutes.createNew,
               ),
             ],
           ),
@@ -44,8 +57,7 @@ GoRouter router(Stream<dynamic> stream) {
       ),
     ],
     redirect: (context, state) {
-      final authenticated =
-          context.watch<AppBloc>().state.status.isAuthenticated;
+      final authenticated = bloc.state.status.isAuthenticated;
       final onLoginPage = state.matchedLocation == Routes.login;
       final onSignUpPage = state.matchedLocation == Routes.signUp;
 
@@ -57,7 +69,7 @@ GoRouter router(Stream<dynamic> stream) {
       }
       return null;
     },
-    refreshListenable: StreamListenable(stream),
+    refreshListenable: bloc,
   );
 }
 

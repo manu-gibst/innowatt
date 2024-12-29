@@ -3,7 +3,12 @@ import 'package:formz/formz.dart';
 /// Validation errors for the [Email] [FormzInput]
 enum EmailValidatorError {
   /// Generic invalid error
-  invalid
+  invalid;
+
+  String text() {
+    if (this == EmailValidatorError.invalid) return 'Email is invalid';
+    return '';
+  }
 }
 
 /// {@template email}

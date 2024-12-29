@@ -40,7 +40,7 @@ class AppView extends StatelessWidget {
     return MaterialApp.router(
       title: 'Innowatt',
       theme: theme.dark(),
-      routerConfig: router(context.read<AuthenticationRepository>().user),
+      routerConfig: router(context.watch<AppBloc>()),
     );
   }
 }

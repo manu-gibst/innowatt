@@ -12,8 +12,21 @@ class _ScaffoldWithNavbar extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
-          BottomNavigationBarItem(icon: Icon(Icons.face), label: 'profile'),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.comments),
+            activeIcon: FaIcon(FontAwesomeIcons.solidComments),
+            label: 'Chat',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.lightbulb),
+            activeIcon: FaIcon(FontAwesomeIcons.solidLightbulb),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: FaIcon(FontAwesomeIcons.user),
+            activeIcon: FaIcon(FontAwesomeIcons.solidUser),
+            label: 'Profile',
+          ),
         ],
         currentIndex: navigationShell.currentIndex,
         onTap: (index) => navigationShell.goBranch(index),

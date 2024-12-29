@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:go_router/go_router.dart';
+import 'package:innowatt/app/router/router.dart';
+import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/old/components/text.dart';
 import 'package:innowatt/constants/routes.dart';
 import 'package:innowatt/old/enums/menu_action.dart';
@@ -8,7 +11,7 @@ import 'package:innowatt/old/services/auth/auth_service.dart';
 import 'package:innowatt/old/services/cloud/chat/firebase_chat_core.dart';
 import 'package:innowatt/old/services/cloud/chat/util_getters.dart';
 import 'package:innowatt/old/utilities/dialogs/logout_dialog.dart';
-import 'package:innowatt/old/views/chats/chat_view.dart';
+import 'package:innowatt/chat/view/chat_view.dart';
 
 class AllChatsView extends StatefulWidget {
   const AllChatsView({super.key});
@@ -97,48 +100,19 @@ class _AllChatsViewState extends State<AllChatsView> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         title: MyText(
-          text: "Chat",
+          text: "Chats",
           color: Theme.of(context).colorScheme.tertiary,
         ),
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(createNewChatRoute);
+              context.push(Routes.chatRoutes.createNew);
             },
             icon: Icon(
               Icons.add,
               color: Theme.of(context).colorScheme.tertiary,
             ),
           ),
-          PopupMenuButton<MenuAction>(
-            iconColor: Theme.of(context).colorScheme.tertiary,
-            onSelected: (value) async {
-              switch (value) {
-                case MenuAction.logout:
-                  final shouldLogout = await showLogOutDialog(context);
-                  if (shouldLogout) {
-                    await AuthService.firebase().logOut();
-                    // ignore: use_build_context_synchronously
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      loginRoute,
-                      (_) => false,
-                    );
-                  }
-                  break;
-              }
-            },
-            itemBuilder: (context) {
-              return [
-                PopupMenuItem(
-                  value: MenuAction.logout,
-                  child: MyText(
-                    text: "Log out",
-                    color: Theme.of(context).colorScheme.tertiary,
-                  ),
-                ),
-              ];
-            },
-          )
         ],
       ),
       body: StreamBuilder<List<types.Room>>(
@@ -153,6 +127,7 @@ class _AllChatsViewState extends State<AllChatsView> {
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
                     final room = snapshot.data![index];
+                    print('##DEBUG##: $room');
 
                     return GestureDetector(
                       onTap: () {

@@ -39,6 +39,7 @@ dependencies:
     path: packages/form_inputs
   formz: ^0.8.0
   go_router: ^14.6.2
+  font_awesome_flutter: ^10.8.0
 
 dev_dependencies:
   flutter_test:
