@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "682609745797",
+    "firebase_url": "https://innowatt-app-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "innowatt-app",
     "storage_bucket": "innowatt-app.firebasestorage.app"
   },

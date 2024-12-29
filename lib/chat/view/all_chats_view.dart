@@ -1,17 +1,16 @@
+import 'package:authentication_repository/authentication_repository.dart'
+    hide User;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:go_router/go_router.dart';
-import 'package:innowatt/app/router/router.dart';
 import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/old/components/text.dart';
-import 'package:innowatt/constants/routes.dart';
-import 'package:innowatt/old/enums/menu_action.dart';
-import 'package:innowatt/old/services/auth/auth_service.dart';
 import 'package:innowatt/old/services/cloud/chat/firebase_chat_core.dart';
 import 'package:innowatt/old/services/cloud/chat/util_getters.dart';
-import 'package:innowatt/old/utilities/dialogs/logout_dialog.dart';
 import 'package:innowatt/chat/view/chat_view.dart';
+import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
 
 class AllChatsView extends StatefulWidget {
   const AllChatsView({super.key});
@@ -88,6 +87,11 @@ class _AllChatsViewState extends State<AllChatsView> {
 
   @override
   Widget build(BuildContext context) {
+    final chatRepository = ChatRepository();
+    final currentUser = context.read<AuthenticationRepository>().currentUser;
+    chatRepository.streamOfAllChats(uid: currentUser.id);
+    chatRepository.createIndividualChat(uid: currentUser.id, roomName: 'Nurik');
+
     if (_error) {
       return Container();
     }
