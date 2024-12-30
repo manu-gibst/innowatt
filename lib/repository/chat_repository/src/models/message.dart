@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
-part 'chat.g.dart';
+part 'message.g.dart';
 
 /// Deserialize Firebase Timestamp data type from Firestore
 Timestamp _firestoreTimestampFromJson(dynamic value) {
@@ -11,39 +11,40 @@ Timestamp _firestoreTimestampFromJson(dynamic value) {
 dynamic _firestoreTimestampToJson(dynamic value) => value;
 
 @JsonSerializable()
-class Chat {
-  const Chat({
-    required this.name,
-    required this.uids,
-    required this.updatedTime,
+class Message {
+  const Message({
+    required this.authorId,
+    required this.createdAt,
+    required this.text,
   });
-  final String name;
-  final List<dynamic> uids;
+
+  final String authorId;
   @JsonKey(
     toJson: _firestoreTimestampToJson,
     fromJson: _firestoreTimestampFromJson,
   )
-  final Timestamp updatedTime;
+  final Timestamp createdAt;
+  final String text;
 
-  factory Chat.fromJson(Map<String, dynamic> json) => _$ChatFromJson(json);
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return _$MessageFromJson(json);
+  }
 
-  Map<String, dynamic> toJson() => _$ChatToJson(this);
+  Map<String, dynamic> toJson() {
+    return _$MessageToJson(this);
+  }
 
-  factory Chat.fromFirestore(
+  factory Message.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
     SnapshotOptions? options,
   ) {
     final data = snapshot.data();
-    return Chat(
-      name: data?['name'],
-      uids: data?['uids'],
-      updatedTime: data?['updated_time'],
+    return Message(
+      authorId: data?['author_id'],
+      createdAt: data?['created_at'],
+      text: data?['text'],
     );
   }
 
   Map<String, dynamic> toFirestore() => toJson();
-
-  @override
-  String toString() =>
-      'Chat { name: $name, uids: $uids, updatedTime: $updatedTime }';
 }

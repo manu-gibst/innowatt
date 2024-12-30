@@ -5,7 +5,7 @@ import 'package:innowatt/old/components/spacings.dart';
 import 'package:innowatt/old/components/text_field.dart';
 import 'package:innowatt/old/services/cloud/chat/firebase_chat_core.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
-import 'package:innowatt/chat/view/chat_view.dart';
+import 'package:innowatt/chat/chat_list/view/chat_view.dart';
 
 class CreateNewChat extends StatefulWidget {
   const CreateNewChat({super.key});

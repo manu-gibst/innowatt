@@ -8,8 +8,8 @@ import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/app/view/app.dart';
 import 'package:innowatt/auth/login/view/login_page.dart';
 import 'package:innowatt/auth/sign_up/view/sign_up_page.dart';
-import 'package:innowatt/chat/view/all_chats_view.dart';
-import 'package:innowatt/chat/view/create_new_chat.dart';
+import 'package:innowatt/chat/chat_list/view/all_chats_view.dart';
+import 'package:innowatt/chat/chat_list/view/create_new_chat.dart';
 part 'scaffold_with_navbar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =

@@ -1,5 +1,6 @@
 import 'package:authentication_repository/authentication_repository.dart'
     hide User;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,8 +10,9 @@ import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/old/components/text.dart';
 import 'package:innowatt/old/services/cloud/chat/firebase_chat_core.dart';
 import 'package:innowatt/old/services/cloud/chat/util_getters.dart';
-import 'package:innowatt/chat/view/chat_view.dart';
+import 'package:innowatt/chat/chat_list/view/chat_view.dart';
 import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
+import 'package:innowatt/repository/chat_repository/src/models/chat.dart';
 
 class AllChatsView extends StatefulWidget {
   const AllChatsView({super.key});
@@ -89,8 +91,39 @@ class _AllChatsViewState extends State<AllChatsView> {
   Widget build(BuildContext context) {
     final chatRepository = ChatRepository();
     final currentUser = context.read<AuthenticationRepository>().currentUser;
-    chatRepository.streamOfAllChats(uid: currentUser.id);
-    chatRepository.createIndividualChat(uid: currentUser.id, roomName: 'Nurik');
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Chat'),
+        actions: [
+          IconButton(
+            onPressed: () => chatRepository.createSingleUserChat(
+              uid: currentUser.id,
+              chatName: 'temp; ${DateTime.now().second}',
+            ),
+            icon: const Icon(Icons.add),
+          ),
+        ],
+      ),
+      body: StreamBuilder<List<Chat>>(
+        stream: chatRepository.streamOfAllChats(uid: currentUser.id),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView(
+              children: snapshot.data!.map(
+                (chat) {
+                  return ListTile(
+                    title: Text(chat.name),
+                    subtitle: Text(
+                        '${chat.updatedTime.toDate().hour}:${chat.updatedTime.toDate().minute.toString().padLeft(2, '0')}'),
+                  );
+                },
+              ).toList(),
+            );
+          }
+          return CircularProgressIndicator();
+        },
+      ),
+    );
 
     if (_error) {
       return Container();

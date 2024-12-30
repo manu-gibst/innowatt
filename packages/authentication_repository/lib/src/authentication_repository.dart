@@ -12,7 +12,7 @@ import 'package:meta/meta.dart';
 class SignUpWithEmailAndPasswordFailure implements Exception {
   /// {@macro sign_up_with_email_and_password_failure}
   const SignUpWithEmailAndPasswordFailure([
-    this.message = 'An unknown exception occured',
+    this.message = 'An unknown error occured',
   ]);
 
   /// Create an authentication message
@@ -56,7 +56,7 @@ class SignUpWithEmailAndPasswordFailure implements Exception {
 class LogInWithEmailAndPasswordFailure implements Exception {
   /// {@macro log_in_with_email_and_password_failure}
   const LogInWithEmailAndPasswordFailure([
-    this.message = 'An unknown exception occurred.',
+    this.message = 'An unknown error occurred.',
   ]);
 
   /// Create an authentication message
@@ -95,7 +95,7 @@ class LogInWithEmailAndPasswordFailure implements Exception {
 class LogInWithGoogleFailure implements Exception {
   /// {@macro log_in_with_google_failure}
   const LogInWithGoogleFailure([
-    this.message = 'An unknown exception occurred.',
+    this.message = 'An unknown error occurred.',
   ]);
 
   /// Create an authentication message
