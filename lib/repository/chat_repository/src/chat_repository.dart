@@ -1,17 +1,27 @@
+import 'dart:async';
+
 import 'package:innowatt/repository/chat_repository/src/exceptions/exception.dart';
 import 'package:innowatt/repository/chat_repository/src/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatRepository {
-  // final _database = FirebaseFirestore.instance;
   final _users = FirebaseFirestore.instance.collection('users').withConverter(
         fromFirestore: User.fromFirestore,
         toFirestore: (User user, _) => user.toFirestore(),
       );
-  final _chats = FirebaseFirestore.instance.collection("chats").withConverter(
+  final _chats = FirebaseFirestore.instance.collection('chats').withConverter(
         fromFirestore: Chat.fromFirestore,
         toFirestore: (Chat chat, _) => chat.toFirestore(),
       );
+
+  final StreamController<List<Chat>> _chatsController =
+      StreamController<List<Chat>>.broadcast();
+
+  bool _hasMoreChats = true;
+  DocumentSnapshot<Chat>? _lastDocument;
+  final List<List<Chat>> _allPagedChats = [];
+
+  bool get hasMoreChats => _hasMoreChats;
 
   void addUser({
     required String uid,
@@ -45,67 +55,71 @@ class ChatRepository {
     try {
       _chats.doc().set(chat);
     } on FirebaseException catch (e) {
-      print('#DEBUG IN [createSingleUserChat]#: ERROR(${e.code}): $e');
       throw FirestoreDatabaseFailure.fromCode(e.code);
     } catch (_) {
       throw FirestoreDatabaseFailure();
     }
   }
 
-  Stream<List<Chat>> streamOfAllChats({required String uid}) {
-    print('#DEBUG IN# streamOfAllChats');
-    try {
-      final streamSnaps = _chats
-          .where("uids", arrayContains: uid)
-          .orderBy('updated_time', descending: true)
-          .limit(5)
-          .snapshots();
-      return streamSnaps.map((event) {
-        return event.docs.map((e) => e.data()).toList();
-      });
-    } on FirebaseException catch (e) {
-      print('#DEBUG IN [streamOfAllChats]#: ERROR(${e.code}): $e');
-      throw FirestoreDatabaseFailure.fromCode(e.code);
-    } catch (_) {
-      throw FirestoreDatabaseFailure();
+  void requestChats({required String uid}) {
+    var pageChatsQuery = _chats
+        .where("uids", arrayContains: uid)
+        .orderBy('updated_time', descending: true)
+        .limit(20);
+    if (_lastDocument != null) {
+      pageChatsQuery = pageChatsQuery.startAfterDocument(_lastDocument!);
     }
-  }
 
-  void sendMessage({
-    required String text,
-    required String authorId,
-    required String chatId,
-  }) {
-    final message = Message(
-      authorId: authorId,
-      createdAt: Timestamp.now(),
-      text: text,
-    );
-    try {
-      final messages = _getMessages(chatId: chatId);
-      messages.doc().set(message);
-    } on FirebaseException catch (e) {
-      print('#DEBUG IN [sendMessage]#: ERROR(${e.code}): $e');
-      throw FirestoreDatabaseFailure.fromCode(e.code);
-    } catch (_) {
-      throw FirestoreDatabaseFailure();
-    }
-  }
+    if (!_hasMoreChats) return;
 
-  Stream<List<Message>> streamOfMessages({required String chatId}) {
-    final queryMessages = _getMessages(chatId: chatId)
-        .orderBy('created_at', descending: true)
-        .limit(10)
-        .snapshots();
-    return queryMessages.map((event) {
-      return event.docs.map((e) => e.data()).toList();
+    var currentRequestIndex = _allPagedChats.length;
+
+    pageChatsQuery.snapshots().listen((snapshot) {
+      if (snapshot.docs.isNotEmpty) {
+        final chats = snapshot.docs.map((e) => e.data()).toList();
+
+        final pageExists = currentRequestIndex < _allPagedChats.length;
+
+        if (pageExists) {
+          _allPagedChats[currentRequestIndex] = chats;
+        } else {
+          _allPagedChats.add(chats);
+        }
+        final allChats = _allPagedChats.fold<List<Chat>>(
+          <Chat>[],
+          (initialValue, pageItems) => initialValue..addAll(pageItems),
+        );
+        _chatsController.add(allChats);
+
+        if (currentRequestIndex == _allPagedChats.length - 1) {
+          _lastDocument = snapshot.docs.last;
+        }
+
+        _hasMoreChats = chats.length == 20;
+      }
     });
   }
 
-  CollectionReference<Message> _getMessages({required String chatId}) {
-    return _chats.doc(chatId).collection('messages').withConverter(
-          fromFirestore: Message.fromFirestore,
-          toFirestore: (Message message, _) => message.toFirestore(),
-        );
+  Stream<List<Chat>> chatsStream({required String uid}) {
+    requestChats(uid: uid);
+    return _chatsController.stream;
+  }
+
+  Future<Chat> getChat({required String chatId}) async {
+    try {
+      final doc = await _chats.doc(chatId).get();
+      final chat = doc.data()!;
+      return chat;
+    } on FirebaseException catch (e) {
+      throw FirestoreDatabaseFailure.fromCode(e.code);
+    } catch (_) {
+      throw FirestoreDatabaseFailure();
+    }
+  }
+
+  Future<bool> isChatsEmpty({required String uid}) async {
+    final querySnapshot =
+        await _chats.where("uids", arrayContains: uid).limit(1).get();
+    return querySnapshot.docs.isEmpty;
   }
 }

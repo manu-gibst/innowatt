@@ -47,4 +47,7 @@ class Message {
   }
 
   Map<String, dynamic> toFirestore() => toJson();
+
+  @override
+  String toString() => 'Message { authorId: $authorId, text: $text }';
 }

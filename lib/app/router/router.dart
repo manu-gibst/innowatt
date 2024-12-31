@@ -8,8 +8,8 @@ import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/app/view/app.dart';
 import 'package:innowatt/auth/login/view/login_page.dart';
 import 'package:innowatt/auth/sign_up/view/sign_up_page.dart';
-import 'package:innowatt/chat/chat_list/view/all_chats_view.dart';
-import 'package:innowatt/chat/chat_list/view/create_new_chat.dart';
+import 'package:innowatt/chat/chat_list/view/all_chats_screen.dart';
+import 'package:innowatt/chat/single_user_chat/view/single_user_chat_screen.dart';
 part 'scaffold_with_navbar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
@@ -36,9 +36,17 @@ GoRouter router(AppBloc bloc) {
           StatefulShellBranch(
             routes: <RouteBase>[
               GoRoute(
-                builder: (context, state) => const AllChatsView(),
-                path: Routes.chatRoutes.allChats,
-              ),
+                  builder: (context, state) => const AllChatsScreen(),
+                  path: Routes.chatRoutes.allChats,
+                  routes: <RouteBase>[
+                    GoRoute(
+                      builder: (context, state) => SingleUserChatScreen(
+                        chatName: state.extra as String,
+                        chatId: state.pathParameters['chatId']!,
+                      ),
+                      path: '/:chatId',
+                    ),
+                  ]),
             ],
           ),
           StatefulShellBranch(
@@ -46,10 +54,6 @@ GoRouter router(AppBloc bloc) {
               GoRoute(
                 builder: (context, state) => const HomePage(),
                 path: Routes.home,
-              ),
-              GoRoute(
-                builder: (context, state) => const CreateNewChat(),
-                path: Routes.chatRoutes.createNew,
               ),
             ],
           ),

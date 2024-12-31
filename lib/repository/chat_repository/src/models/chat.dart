@@ -13,17 +13,27 @@ dynamic _firestoreTimestampToJson(dynamic value) => value;
 @JsonSerializable()
 class Chat {
   const Chat({
+    this.chatId,
     required this.name,
     required this.uids,
     required this.updatedTime,
   });
+
+  final String? chatId;
   final String name;
   final List<dynamic> uids;
+
+  static const empty = Chat(
+    name: '',
+    uids: [],
+    updatedTime: null,
+  );
+
   @JsonKey(
     toJson: _firestoreTimestampToJson,
     fromJson: _firestoreTimestampFromJson,
   )
-  final Timestamp updatedTime;
+  final Timestamp? updatedTime;
 
   factory Chat.fromJson(Map<String, dynamic> json) => _$ChatFromJson(json);
 
@@ -35,6 +45,7 @@ class Chat {
   ) {
     final data = snapshot.data();
     return Chat(
+      chatId: snapshot.id,
       name: data?['name'],
       uids: data?['uids'],
       updatedTime: data?['updated_time'],
@@ -44,6 +55,6 @@ class Chat {
   Map<String, dynamic> toFirestore() => toJson();
 
   @override
-  String toString() =>
-      'Chat { name: $name, uids: $uids, updatedTime: $updatedTime }';
+  String toString() => 'Chat { chatId: $chatId name: $name } ';
+  // 'Chat { name: $name, uids: $uids, updatedTime: $updatedTime } ';
 }

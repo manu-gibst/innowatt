@@ -3,11 +3,9 @@ abstract final class Routes {
   static const signUp = '/sign-up';
   static const home = '/';
   static final ChatRoutes chatRoutes = ChatRoutes();
-
-  static const chatsCreateNew = '/chats/new-chat';
 }
 
 final class ChatRoutes {
   String get allChats => '/chats';
-  String get createNew => '/chats/new-chat';
+  String singleUserChat({required String chatId}) => '/chats/$chatId';
 }

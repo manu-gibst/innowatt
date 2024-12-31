@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
-import 'package:innowatt/app/router/router.dart';
 import 'package:innowatt/auth/sign_up/cubit/sign_up_cubit.dart';
 
 class SignUpForm extends StatelessWidget {

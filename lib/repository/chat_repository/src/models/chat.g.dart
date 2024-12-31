@@ -11,6 +11,7 @@ Chat _$ChatFromJson(Map<String, dynamic> json) => $checkedCreate(
       json,
       ($checkedConvert) {
         final val = Chat(
+          chatId: $checkedConvert('chat_id', (v) => v as String?),
           name: $checkedConvert('name', (v) => v as String),
           uids: $checkedConvert('uids', (v) => v as List<dynamic>),
           updatedTime: $checkedConvert(
@@ -18,10 +19,11 @@ Chat _$ChatFromJson(Map<String, dynamic> json) => $checkedCreate(
         );
         return val;
       },
-      fieldKeyMap: const {'updatedTime': 'updated_time'},
+      fieldKeyMap: const {'chatId': 'chat_id', 'updatedTime': 'updated_time'},
     );
 
 Map<String, dynamic> _$ChatToJson(Chat instance) => <String, dynamic>{
+      'chat_id': instance.chatId,
       'name': instance.name,
       'uids': instance.uids,
       'updated_time': _firestoreTimestampToJson(instance.updatedTime),

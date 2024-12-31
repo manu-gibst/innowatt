@@ -13,17 +13,17 @@ class _ScaffoldWithNavbar extends StatelessWidget {
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.comments),
+            icon: FaIcon(FontAwesomeIcons.comments, size: 16),
             activeIcon: FaIcon(FontAwesomeIcons.solidComments),
             label: 'Chat',
           ),
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.lightbulb),
+            icon: FaIcon(FontAwesomeIcons.lightbulb, size: 16),
             activeIcon: FaIcon(FontAwesomeIcons.solidLightbulb),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: FaIcon(FontAwesomeIcons.user),
+            icon: FaIcon(FontAwesomeIcons.user, size: 16),
             activeIcon: FaIcon(FontAwesomeIcons.solidUser),
             label: 'Profile',
           ),

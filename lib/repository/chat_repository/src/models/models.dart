@@ -1,6 +1,5 @@
 export 'user.dart';
 export 'chat.dart';
-export 'message.dart';
 
 
 // If new parameters will be added
