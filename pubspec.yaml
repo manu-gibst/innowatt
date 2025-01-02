@@ -45,6 +45,7 @@ dependencies:
   firebase_database: ^11.2.0
   stream_transform: ^2.1.1
   bloc_concurrency: ^0.2.5
+  scroll_to_index: ^3.0.1
 
 dev_dependencies:
   flutter_test:

@@ -27,7 +27,7 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
     on<ChatListSingleUserChatCreated>(_onSingleUserChatCreated);
     on<ChatListFetched>(
       _onFetched,
-      // transformer: throttleDroppable(throttleDuration),
+      transformer: throttleDroppable(throttleDuration),
     );
   }
 

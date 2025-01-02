@@ -31,4 +31,8 @@ final class MessagesState extends Equatable {
 
   @override
   List<Object?> get props => [chat, messages, status, hasReachedMax];
+
+  @override
+  String toString() =>
+      'MessageState { number of messages: ${messages?.length}, status: $status, hasReachedMax: $hasReachedMax }';
 }

@@ -11,6 +11,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => $checkedCreate(
       json,
       ($checkedConvert) {
         final val = Message(
+          id: $checkedConvert('id', (v) => v as String),
           authorId: $checkedConvert('author_id', (v) => v as String),
           createdAt: $checkedConvert(
               'created_at', (v) => _firestoreTimestampFromJson(v)),
@@ -22,6 +23,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => $checkedCreate(
     );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
+      'id': instance.id,
       'author_id': instance.authorId,
       'created_at': _firestoreTimestampToJson(instance.createdAt),
       'text': instance.text,

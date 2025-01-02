@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:innowatt/chat/chat_list/view/bottom_loader.dart';
 import 'package:innowatt/chat/single_user_chat/bloc/messages_bloc.dart';
-import 'package:innowatt/chat/single_user_chat/view/message_list_item.dart';
+import 'package:innowatt/chat/single_user_chat/view/chat_list_builder.dart';
+import 'package:innowatt/chat/single_user_chat/view/message_bubble.dart';
 import 'package:innowatt/core/widgets/error_card.dart';
 import 'package:innowatt/repository/message_repository/message_repository.dart';
 
@@ -66,35 +67,40 @@ class _SingleUserChatViewState extends State<SingleUserChatView> {
       body: Column(
         children: [
           Expanded(
-              child: _MessagesBuilder(scrollController: _scrollController)),
-          Align(
-            alignment: Alignment(0, 1),
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              color: Theme.of(context).colorScheme.surfaceContainerHigh,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(width: 20),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Send Message',
-                        contentPadding: EdgeInsets.only(left: 10),
-                      ),
-                      controller: _messageController,
-                      onSubmitted: (value) => _sendMessage,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: _sendMessage,
-                    icon: Icon(Icons.send),
-                  ),
-                ],
+            child: _MessagesBuilder(scrollController: _scrollController),
+          ),
+          _buildSendContainer(context),
+        ],
+      ),
+    );
+  }
+
+  Align _buildSendContainer(BuildContext context) {
+    return Align(
+      alignment: Alignment(0, 1),
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(width: 20),
+            Expanded(
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Send Message',
+                  contentPadding: EdgeInsets.only(left: 10),
+                ),
+                controller: _messageController,
+                onSubmitted: (value) => _sendMessage,
               ),
             ),
-          ),
-        ],
+            IconButton(
+              onPressed: _sendMessage,
+              icon: Icon(Icons.send),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -119,8 +125,7 @@ class _SingleUserChatViewState extends State<SingleUserChatView> {
     if (!_scrollController.hasClients) return false;
     final maxScroll = _scrollController.position.minScrollExtent;
     final currentScroll = _scrollController.offset;
-    print('isTop: ${currentScroll <= (maxScroll * 0.9)}');
-    return currentScroll <= (maxScroll * 0.9);
+    return currentScroll >= (maxScroll * 0.9);
   }
 
   @override
@@ -153,18 +158,11 @@ class _MessagesBuilder extends StatelessWidget {
             if (messages != null && messages.isEmpty) {
               return _EmptyMessagesView();
             }
-            return ListView.builder(
-              itemBuilder: (context, index) {
-                return index >= messages.length
-                    ? EmptyLoader()
-                    : MessageListItem(
-                        message: messages[index],
-                      );
-              },
-              reverse: true,
-              itemCount:
-                  state.hasReachedMax ? messages!.length : messages!.length + 1,
-              controller: _scrollController,
+            return ChatListBuilder(
+              messages: messages!,
+              currentUserId:
+                  context.read<AuthenticationRepository>().currentUser.id,
+              scrollController: _scrollController,
             );
         }
       },

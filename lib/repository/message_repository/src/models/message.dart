@@ -13,11 +13,13 @@ dynamic _firestoreTimestampToJson(dynamic value) => value;
 @JsonSerializable()
 class Message {
   const Message({
+    this.id,
     required this.authorId,
     required this.createdAt,
     required this.text,
   });
 
+  final String? id;
   final String authorId;
   @JsonKey(
     toJson: _firestoreTimestampToJson,
@@ -40,6 +42,7 @@ class Message {
   ) {
     final data = snapshot.data();
     return Message(
+      id: snapshot.id,
       authorId: data?['author_id'],
       createdAt: data?['created_at'],
       text: data?['text'],
@@ -47,6 +50,32 @@ class Message {
   }
 
   Map<String, dynamic> toFirestore() => toJson();
+
+  bool isDifferent(Message? other) {
+    if (other == null) return true;
+    if (authorId != other.authorId) return true;
+    if (differenceInHours(other) > 1) return true;
+    return false;
+  }
+
+  int differenceInHours(Message other) {
+    try {
+      final difference =
+          (createdAt.toDate()).difference(other.createdAt.toDate());
+      return difference.inHours.abs();
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  bool isDifferentDay(Message other) {
+    try {
+      return createdAt.toDate().toString().substring(0, 10) !=
+          other.createdAt.toDate().toString().substring(0, 10);
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   String toString() => 'Message { authorId: $authorId, text: $text }';

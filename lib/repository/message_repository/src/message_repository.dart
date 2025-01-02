@@ -34,7 +34,6 @@ class MessageRepository {
       createdAt: Timestamp.now(),
       text: text,
     );
-    print(message);
     try {
       final messages = _messages;
       messages.doc().set(message);
@@ -86,8 +85,8 @@ class MessageRepository {
 
   Stream<List<Message>> messagesStream() {
     _requestMessages();
-    print('in messagesStream');
-    print(_allPagedMessages);
+    print(
+        'in messagesStream: _allPagedMessages.length=${_allPagedMessages.length}');
     return _messagesController.stream;
   }
 

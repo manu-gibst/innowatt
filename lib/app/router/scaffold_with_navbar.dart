@@ -11,6 +11,7 @@ class _ScaffoldWithNavbar extends StatelessWidget {
     return Scaffold(
       body: navigationShell,
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: FaIcon(FontAwesomeIcons.comments, size: 16),
