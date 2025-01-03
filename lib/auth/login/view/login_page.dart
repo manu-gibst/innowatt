@@ -10,7 +10,6 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
       body: Padding(
         padding: const EdgeInsets.all(14),
         child: BlocProvider(

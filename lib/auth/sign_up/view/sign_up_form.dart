@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innowatt/auth/sign_up/cubit/sign_up_cubit.dart';
+import 'package:innowatt/core/widgets/elevated_button.dart';
 
 class SignUpForm extends StatelessWidget {
   const SignUpForm({super.key});
@@ -29,9 +30,7 @@ class SignUpForm extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _EmailInput(),
-            const SizedBox(height: 8),
             _PasswordInput(),
-            const SizedBox(height: 8),
             _ConfirmPasswordInput(),
             const SizedBox(height: 8),
             _SignUpButton(),
@@ -54,9 +53,10 @@ class _EmailInput extends StatelessWidget {
       onChanged: (email) => context.read<SignUpCubit>().emailChanged(email),
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
+        border: OutlineInputBorder(),
         labelText: 'email',
         helperText: '',
-        errorText: displayError != null ? 'invalid email' : null,
+        errorText: displayError?.text(),
       ),
     );
   }
@@ -74,9 +74,10 @@ class _PasswordInput extends StatelessWidget {
           context.read<SignUpCubit>().passwordChanged(password),
       obscureText: true,
       decoration: InputDecoration(
+        border: OutlineInputBorder(),
         labelText: 'password',
         helperText: '',
-        errorText: displayError != null ? 'invalid password' : null,
+        errorText: displayError?.text(),
       ),
     );
   }
@@ -94,9 +95,10 @@ class _ConfirmPasswordInput extends StatelessWidget {
           context.read<SignUpCubit>().confirmedPasswordChanged(confirmPassword),
       obscureText: true,
       decoration: InputDecoration(
+        border: OutlineInputBorder(),
         labelText: 'confirm password',
         helperText: '',
-        errorText: displayError != null ? 'passwords do not match' : null,
+        errorText: displayError?.text(),
       ),
     );
   }
@@ -113,20 +115,21 @@ class _SignUpButton extends StatelessWidget {
     );
     return ElevatedButton(
       key: const Key('signUpForm_continue_raisedButton'),
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-      ),
+      style: customElevatedButtonStyle(context),
       onPressed: isValid
           ? () {
               context.read<SignUpCubit>().signUpFormSubmitted();
               context.pop();
             }
           : null,
-      child: !isInProgress
-          ? const Text('SIGN UP')
-          : const CircularProgressIndicator(),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: !isInProgress
+              ? const Text('SIGN UP')
+              : const CircularProgressIndicator(),
+        ),
+      ),
     );
   }
 }

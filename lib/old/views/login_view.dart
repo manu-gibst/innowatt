@@ -37,7 +37,8 @@ class _LoginViewState extends State<LoginView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
+      backgroundColor: Colors.red,
+      // backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -52,7 +53,8 @@ class _LoginViewState extends State<LoginView> {
               Expanded(
                 child: MyText(
                   text: "Charge your business with InnoWatt!",
-                  color: Theme.of(context).colorScheme.primary,
+                  color: Colors.red,
+                  // color: Theme.of(context).colorScheme.primary,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),

@@ -67,7 +67,7 @@ class _AllChatsViewState extends State<AllChatsView> {
               if (chats.isEmpty) {
                 return _EmptyChatsView();
               }
-              return ListView.builder(
+              return ListView.separated(
                 itemBuilder: (context, index) {
                   return index >= chats.length
                       ? const EmptyLoader()
@@ -75,6 +75,9 @@ class _AllChatsViewState extends State<AllChatsView> {
                 },
                 itemCount:
                     state.hasReachedMax ? chats.length : chats.length + 1,
+                separatorBuilder: (context, index) => Divider(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                ),
                 controller: _scrollController,
               );
           }

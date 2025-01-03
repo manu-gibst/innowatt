@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/constants/image_routes.dart';
 import 'package:innowatt/auth/login/cubit/login_cubit.dart';
+import 'package:innowatt/core/widgets/elevated_button.dart';
 
 class LoginForm extends StatelessWidget {
   const LoginForm({super.key});
@@ -120,16 +121,9 @@ class _LoginButton extends StatelessWidget {
       (LoginCubit cubit) => cubit.state.isValid,
     );
 
-    final colorScheme = Theme.of(context).colorScheme;
     return ElevatedButton(
       key: const Key('loginForm_continue_raisedButton'),
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        backgroundColor: colorScheme.primaryContainer,
-        foregroundColor: colorScheme.onPrimaryContainer,
-      ),
+      style: customElevatedButtonStyle(context),
       onPressed: isValid
           ? () => context.read<LoginCubit>().logInWithCredentials()
           : null,

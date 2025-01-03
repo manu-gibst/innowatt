@@ -55,6 +55,7 @@ class Message {
     if (other == null) return true;
     if (authorId != other.authorId) return true;
     if (differenceInHours(other) > 1) return true;
+    if (isDifferentDay(other)) return true;
     return false;
   }
 

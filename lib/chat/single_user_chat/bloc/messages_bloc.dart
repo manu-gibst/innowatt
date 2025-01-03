@@ -18,8 +18,11 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
 }
 
 class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
-  MessagesBloc({required MessageRepository messageRepository})
+  MessagesBloc(
+      {required MessageRepository messageRepository,
+      required ChatRepository chatRepository})
       : _messageRepository = messageRepository,
+        _chatRepository = chatRepository,
         super(MessagesState()) {
     on<MessagesFetched>(
       _onFetched,
@@ -28,6 +31,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     on<MessageSent>(_onSent);
   }
   final MessageRepository _messageRepository;
+  final ChatRepository _chatRepository;
 
   Future<void> _onFetched(
     MessagesFetched event,
@@ -65,5 +69,6 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
       authorId: event.authorId,
       chatId: _messageRepository.chatId,
     );
+    _chatRepository.updateCreatedTime(chatId: _messageRepository.chatId);
   }
 }

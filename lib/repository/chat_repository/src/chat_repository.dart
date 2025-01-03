@@ -122,4 +122,8 @@ class ChatRepository {
         await _chats.where("uids", arrayContains: uid).limit(1).get();
     return querySnapshot.docs.isEmpty;
   }
+
+  void updateCreatedTime({required String chatId}) {
+    _chats.doc(chatId).update({'updated_time': Timestamp.now()});
+  }
 }

@@ -85,8 +85,8 @@ class _Bubble extends StatelessWidget {
                         text: ' ${message.createdAt.time()}',
                         style: TextStyle(
                           color: Colors.transparent,
-                          fontSize: 6,
-                          letterSpacing: 4,
+                          fontSize: 7,
+                          letterSpacing: 3,
                         ),
                       ),
                     ],
@@ -97,7 +97,7 @@ class _Bubble extends StatelessWidget {
                   right: 0,
                   child: Text(
                     message.createdAt.time(),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: Theme.of(context).colorScheme.tertiary,
                         ),
                   ),

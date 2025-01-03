@@ -1,11 +1,10 @@
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:innowatt/chat/chat_list/view/bottom_loader.dart';
 import 'package:innowatt/chat/single_user_chat/bloc/messages_bloc.dart';
 import 'package:innowatt/chat/single_user_chat/view/chat_list_builder.dart';
-import 'package:innowatt/chat/single_user_chat/view/message_bubble.dart';
 import 'package:innowatt/core/widgets/error_card.dart';
+import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
 import 'package:innowatt/repository/message_repository/message_repository.dart';
 
 class SingleUserChatScreen extends StatelessWidget {
@@ -24,6 +23,7 @@ class SingleUserChatScreen extends StatelessWidget {
       lazy: false,
       create: (context) => MessagesBloc(
         messageRepository: MessageRepository(chatId: chatId),
+        chatRepository: ChatRepository(),
       )..add(MessagesFetched()),
       child: SingleUserChatView(
         chatId: chatId,
@@ -106,6 +106,7 @@ class _SingleUserChatViewState extends State<SingleUserChatView> {
   }
 
   void _sendMessage() {
+    if (_messageController.text.isEmpty) return;
     context.read<MessagesBloc>().add(
           MessageSent(
             text: _messageController.text,

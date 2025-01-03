@@ -3,7 +3,14 @@ import 'package:formz/formz.dart';
 /// Validation errors for the [ConfirmedPassword] [FormzInput]
 enum ConfirmedPasswordValidationError {
   /// Generic invalid error
-  invalid
+  invalid;
+
+  String text() {
+    if (this == ConfirmedPasswordValidationError.invalid) {
+      return 'Password should contain letters';
+    }
+    return '';
+  }
 }
 
 /// {@template confirmed_password}

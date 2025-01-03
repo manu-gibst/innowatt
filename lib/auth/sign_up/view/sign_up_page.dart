@@ -12,7 +12,7 @@ class SignUpPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Sign Up')),
       body: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
         child: BlocProvider(
           create: (_) => SignUpCubit(context.read<AuthenticationRepository>()),
           child: const SignUpForm(),
