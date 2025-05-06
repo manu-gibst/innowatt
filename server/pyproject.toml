@@ -1,0 +1,4 @@
+[project]
+name = "innowatt"
+version = "0.1.0"
+description = "Backend that handles all AI API requests"

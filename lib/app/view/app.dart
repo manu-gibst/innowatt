@@ -42,6 +42,7 @@ class AppView extends StatelessWidget {
     //   home: ThemeTester(),
     // );
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'Innowatt',
       theme: theme.dark(),
       routerConfig: router(context.watch<AppBloc>()),

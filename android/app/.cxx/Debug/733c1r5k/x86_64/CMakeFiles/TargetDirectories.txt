@@ -1,0 +1,2 @@
+C:/Users/nuras/CS_Projects/flutter/innowatt/android/app/.cxx/Debug/733c1r5k/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/nuras/CS_Projects/flutter/innowatt/android/app/.cxx/Debug/733c1r5k/x86_64/CMakeFiles/rebuild_cache.dir

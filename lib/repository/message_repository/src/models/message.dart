@@ -49,7 +49,11 @@ class Message {
     );
   }
 
-  Map<String, dynamic> toFirestore() => toJson();
+  Map<String, dynamic> toFirestore() {
+    var json = toJson();
+    json.remove('id');
+    return json;
+  }
 
   bool isDifferent(Message? other) {
     if (other == null) return true;
