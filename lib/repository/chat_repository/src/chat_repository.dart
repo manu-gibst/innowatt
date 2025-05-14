@@ -20,6 +20,7 @@ class ChatRepository {
   bool _hasMoreChats = true;
   DocumentSnapshot<Chat>? _lastDocument;
   final List<List<Chat>> _allPagedChats = [];
+  Timestamp? lastFetchTimestamp;
 
   bool get hasMoreChats => _hasMoreChats;
 
