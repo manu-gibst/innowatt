@@ -8,18 +8,41 @@ import 'package:innowatt/chat/chat_list/view/bottom_loader.dart';
 import 'package:innowatt/chat/chat_list/view/chat_list_item.dart';
 import 'package:innowatt/core/widgets/error_card.dart';
 import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class AllChatsScreen extends StatelessWidget {
+class AllChatsScreen extends StatefulWidget {
   const AllChatsScreen({super.key});
 
   @override
+  State<AllChatsScreen> createState() => _AllChatsScreenState();
+}
+
+class _AllChatsScreenState extends State<AllChatsScreen> {
+  late final SharedPreferences _prefs;
+  bool _isLoading = true;
+  @override
+  void initState() {
+    _initPrefs();
+    super.initState();
+  }
+
+  Future<void> _initPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    print("in AttChatsScreen build()");
+    if (_isLoading) return const CircularProgressIndicator();
     return BlocProvider(
       lazy: false,
       create: (context) => ChatListBloc(
-        chatRepository: ChatRepository(),
+        chatRepository: ChatRepository(prefs: _prefs),
         authenticationRepository: context.read<AuthenticationRepository>(),
-      )..add(ChatListFetched()),
+      )..add(ChatListFetched(loadOnlyNew: true)),
       child: const AllChatsView(),
     );
   }
@@ -43,6 +66,7 @@ class _AllChatsViewState extends State<AllChatsView> {
 
   @override
   Widget build(BuildContext context) {
+    print("in AllChatsView build()");
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat'),
@@ -69,9 +93,15 @@ class _AllChatsViewState extends State<AllChatsView> {
               }
               return ListView.separated(
                 itemBuilder: (context, index) {
-                  return index >= chats.length
-                      ? const EmptyLoader()
-                      : ChatListItem(chat: chats[index]);
+                  if (index >= chats.length) {
+                    return chats.length == 20
+                        ? const EmptyLoader()
+                        : Container();
+                  } else {
+                    return ChatListItem(
+                        key: Key(chats[index].chatId.toString()),
+                        chat: chats[index]);
+                  }
                 },
                 itemCount:
                     state.hasReachedMax ? chats.length : chats.length + 1,
@@ -88,7 +118,7 @@ class _AllChatsViewState extends State<AllChatsView> {
 
   void _onScroll() {
     if (_isBottom) {
-      context.read<ChatListBloc>().add(ChatListFetched());
+      context.read<ChatListBloc>().add(ChatListFetched(loadOnlyNew: false));
     }
   }
 

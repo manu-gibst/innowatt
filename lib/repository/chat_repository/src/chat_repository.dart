@@ -1,28 +1,98 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:innowatt/repository/chat_repository/src/exceptions/exception.dart';
 import 'package:innowatt/repository/chat_repository/src/models/models.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatRepository {
-  final _users = FirebaseFirestore.instance.collection('users').withConverter(
-        fromFirestore: User.fromFirestore,
-        toFirestore: (User user, _) => user.toFirestore(),
-      );
-  final _chats = FirebaseFirestore.instance.collection('chats').withConverter(
-        fromFirestore: Chat.fromFirestore,
-        toFirestore: (Chat chat, _) => chat.toFirestore(),
-      );
+  ChatRepository({
+    SharedPreferences? prefs,
+    List<Chat>? chats,
+  })  : _prefs = prefs,
+        _sortedChats = chats ?? [],
+        _chatsMap = {} {
+    if (prefs != null) _initChats();
+  }
+  final _usersCollection =
+      FirebaseFirestore.instance.collection('users').withConverter(
+            fromFirestore: User.fromFirestore,
+            toFirestore: (User user, _) => user.toFirestore(),
+          );
+  final _chatsCollection =
+      FirebaseFirestore.instance.collection('chats').withConverter(
+            fromFirestore: Chat.fromFirestore,
+            toFirestore: (Chat chat, _) => chat.toFirestore(),
+          );
 
   final StreamController<List<Chat>> _chatsController =
       StreamController<List<Chat>>.broadcast();
 
   bool _hasMoreChats = true;
   DocumentSnapshot<Chat>? _lastDocument;
-  final List<List<Chat>> _allPagedChats = [];
-  Timestamp? lastFetchTimestamp;
+  late final Map<String, Chat> _chatsMap;
+
+  final List<Chat> _sortedChats;
+
+  void _initChats() {
+    print("In _initChats()");
+    final savedChats = _getChatsMap() ?? <String, Chat>{};
+    _chatsMap.addAll(savedChats);
+    _sortedChats.addAll(_chatsMap.values);
+    _sortedChats.sort(
+      (a, b) => b.updatedTime!.compareTo(a.updatedTime!),
+    );
+    print("Initial _sortedChats = $_sortedChats");
+  }
+
+  final SharedPreferences? _prefs;
+
+  Timestamp? _lastFetchTimestamp;
+  static const lastFetchTimestampKey = '__lastFetchTimestamp__';
+  static const chatsMapKey = '__chatsMap__';
 
   bool get hasMoreChats => _hasMoreChats;
+
+  Future<void> _updateLastFetchTime() async {
+    await _prefs!
+        .setInt(lastFetchTimestampKey, Timestamp.now().microsecondsSinceEpoch);
+  }
+
+  Timestamp _getLastFetchTime() {
+    return Timestamp.fromMicrosecondsSinceEpoch(
+      _prefs!.getInt(lastFetchTimestampKey) ?? 0,
+    );
+  }
+
+  void _updateChatsMap() {
+    final List<String> li = _sortedChats.map((chat) {
+      final chatJson = chat.toJson();
+      chatJson['updated_time'] = chat.updatedTime!.microsecondsSinceEpoch;
+      return jsonEncode(chatJson);
+    }).toList();
+    _prefs!.setStringList(chatsMapKey, li);
+  }
+
+  Map<String, Chat>? _getChatsMap() {
+    final jsonList = _prefs!.getStringList(chatsMapKey);
+    if (jsonList == null) return null;
+
+    Map<String, Chat> result = {};
+    for (var json in jsonList) {
+      print("in _getChatsMap()");
+      print("json = $json");
+      final chatJson = jsonDecode(json);
+      chatJson['updated_time'] =
+          Timestamp.fromMicrosecondsSinceEpoch(chatJson['updated_time']);
+      print("chatJson = $chatJson");
+      final chat = Chat.fromJson(chatJson);
+      print("chat = $chat");
+      result[chat.chatId!] = chat;
+    }
+    print(result);
+    return result;
+  }
 
   void addUser({
     required String uid,
@@ -35,7 +105,7 @@ class ChatRepository {
       fullname: fullname ?? '',
     );
     try {
-      _users.doc(user.uid).set(user);
+      _usersCollection.doc(user.uid).set(user);
     } on FirebaseException catch (e) {
       print('#DEBUG IN [addUser]#: ERROR(${e.code}): $e');
       throw FirestoreDatabaseFailure.fromCode(e.code);
@@ -54,7 +124,7 @@ class ChatRepository {
       updatedTime: Timestamp.now(),
     );
     try {
-      _chats.doc().set(chat);
+      _chatsCollection.doc().set(chat);
     } on FirebaseException catch (e) {
       throw FirestoreDatabaseFailure.fromCode(e.code);
     } catch (_) {
@@ -62,53 +132,72 @@ class ChatRepository {
     }
   }
 
-  void requestChats({required String uid}) {
-    var pageChatsQuery = _chats
+  void requestChats({required String uid, bool loadOnlyNew = false}) {
+    print("#DEBUG# loadOnlyNew = $loadOnlyNew");
+    var chatsQuery = _chatsCollection
         .where("uids", arrayContains: uid)
         .orderBy('updated_time', descending: true)
         .limit(20);
     if (_lastDocument != null) {
-      pageChatsQuery = pageChatsQuery.startAfterDocument(_lastDocument!);
+      chatsQuery = chatsQuery.startAfterDocument(_lastDocument!);
+    }
+    if (loadOnlyNew) {
+      _lastFetchTimestamp ??= _getLastFetchTime();
+      chatsQuery = chatsQuery.where(
+        'updated_time',
+        isGreaterThan: _lastFetchTimestamp,
+      );
     }
 
     if (!_hasMoreChats) return;
 
-    var currentRequestIndex = _allPagedChats.length;
-
-    pageChatsQuery.snapshots().listen((snapshot) {
+    chatsQuery.snapshots().listen((snapshot) {
+      if (snapshot.docs.isEmpty) {
+        _chatsController.add(_sortedChats);
+      }
       if (snapshot.docs.isNotEmpty) {
-        final chats = snapshot.docs.map((e) => e.data()).toList();
+        final newChats = snapshot.docs.map((e) => e.data()).toList();
+        print("New Chats fetched: $newChats");
 
-        final pageExists = currentRequestIndex < _allPagedChats.length;
-
-        if (pageExists) {
-          _allPagedChats[currentRequestIndex] = chats;
-        } else {
-          _allPagedChats.add(chats);
-        }
-        final allChats = _allPagedChats.fold<List<Chat>>(
-          <Chat>[],
-          (initialValue, pageItems) => initialValue..addAll(pageItems),
-        );
-        _chatsController.add(allChats);
-
-        if (currentRequestIndex == _allPagedChats.length - 1) {
-          _lastDocument = snapshot.docs.last;
+        for (var chat in newChats) {
+          print('Checking if _chatsMap has Chat ${chat.chatId!}');
+          if (_chatsMap.containsKey(chat.chatId!)) {
+            if (_sortedChats.remove(chat)) {
+              print("Chat removed successfully; _sortedChats = $_sortedChats");
+            } else {
+              print("Failed to remove chat; _sortedChats = $_sortedChats");
+            }
+          }
+          _sortedChats.insert(0, chat);
+          print('_sortedChats = $_sortedChats');
+          _chatsMap[chat.chatId!] = chat;
         }
 
-        _hasMoreChats = chats.length == 20;
+        _chatsController.add(_sortedChats);
+        print("#DEBUG# sortedChats = $_sortedChats");
+
+        _lastDocument = snapshot.docs.last;
+
+        _hasMoreChats = newChats.length == 20;
+
+        _lastFetchTimestamp = Timestamp.now();
+        _updateLastFetchTime();
       }
     });
   }
 
-  Stream<List<Chat>> chatsStream({required String uid}) {
-    requestChats(uid: uid);
+  Stream<List<Chat>> chatsStream({
+    required String uid,
+    bool loadOnlyNew = false,
+  }) {
+    print("In chatsStream");
+    requestChats(uid: uid, loadOnlyNew: loadOnlyNew);
     return _chatsController.stream;
   }
 
   Future<Chat> getChat({required String chatId}) async {
     try {
-      final doc = await _chats.doc(chatId).get();
+      final doc = await _chatsCollection.doc(chatId).get();
       final chat = doc.data()!;
       return chat;
     } on FirebaseException catch (e) {
@@ -120,11 +209,16 @@ class ChatRepository {
 
   Future<bool> isChatsEmpty({required String uid}) async {
     final querySnapshot =
-        await _chats.where("uids", arrayContains: uid).limit(1).get();
+        await _chatsCollection.where("uids", arrayContains: uid).limit(1).get();
     return querySnapshot.docs.isEmpty;
   }
 
   void updateCreatedTime({required String chatId}) {
-    _chats.doc(chatId).update({'updated_time': Timestamp.now()});
+    _chatsCollection.doc(chatId).update({'updated_time': Timestamp.now()});
+  }
+
+  void dispose() {
+    _chatsController.close();
+    _updateChatsMap();
   }
 }

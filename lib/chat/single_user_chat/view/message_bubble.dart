@@ -123,11 +123,6 @@ class _Bubble extends StatelessWidget {
 }
 
 extension on Timestamp {
-  String date() {
-    final date = toDate().toIso8601String().substring(0, 10);
-    return date;
-  }
-
   String time() {
     final date = toDate();
     return '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';

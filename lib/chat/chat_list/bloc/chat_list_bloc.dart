@@ -2,6 +2,7 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
 import 'package:innowatt/repository/chat_repository/src/models/models.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -52,7 +53,7 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
     try {
       final uid = _authenticationRepository.currentUser.id;
       await emit.forEach(
-        _chatRepository.chatsStream(uid: uid),
+        _chatRepository.chatsStream(uid: uid, loadOnlyNew: event.loadOnlyNew),
         onData: (chats) {
           return state.copyWith(
             status: ChatListStatus.success,
@@ -61,8 +62,15 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
           );
         },
       );
-    } catch (_) {
+    } catch (e) {
+      print(e);
       emit(state.copyWith(status: ChatListStatus.failure));
     }
+  }
+
+  @override
+  Future<void> close() {
+    _chatRepository.dispose();
+    return super.close();
   }
 }

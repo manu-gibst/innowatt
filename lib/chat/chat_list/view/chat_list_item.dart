@@ -41,11 +41,11 @@ String _getTimeOrDay(Timestamp timestamp) {
   final difference = time.difference(currentTime).inDays.abs();
   // Check if [timestamp] was on the same day
   if (currentTime.day == time.day) {
-    return '${time.hour}:${time.minute}';
+    return '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
   }
   // Check if [timestamp] was earliear or on Monday
   if (difference < 7 && time.weekday < currentTime.weekday) {
-    return '${_weekDays[time.weekday - 1]}';
+    return _weekDays[time.weekday - 1];
   }
   // Return month
   return '${_months[time.month - 1]} ${time.day}';

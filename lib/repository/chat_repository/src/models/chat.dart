@@ -3,8 +3,11 @@ import 'package:json_annotation/json_annotation.dart';
 part 'chat.g.dart';
 
 /// Deserialize Firebase Timestamp data type from Firestore
-Timestamp _firestoreTimestampFromJson(dynamic value) {
-  return value != null ? Timestamp.fromMicrosecondsSinceEpoch(value) : value;
+Timestamp? _firestoreTimestampFromJson(dynamic value) {
+  if (value == null) return null;
+  if (value is Timestamp) return value;
+  if (value is int) return Timestamp.fromMicrosecondsSinceEpoch(value);
+  throw FormatException('Invalid timestamp format: $value');
 }
 
 /// This method only stores the "timestamp" data type back in the Firestore
@@ -57,4 +60,13 @@ class Chat {
   @override
   String toString() => 'Chat { chatId: $chatId name: $name } ';
   // 'Chat { name: $name, uids: $uids, updatedTime: $updatedTime } ';
+
+  @override
+  int get hashCode => chatId.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Chat && other.chatId == chatId;
+  }
 }

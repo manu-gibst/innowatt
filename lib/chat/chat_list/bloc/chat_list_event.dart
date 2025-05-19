@@ -19,4 +19,7 @@ final class ChatListSingleUserChatCreated extends ChatListEvent {
   List<Object> get props => [uid, chatName];
 }
 
-final class ChatListFetched extends ChatListEvent {}
+final class ChatListFetched extends ChatListEvent {
+  const ChatListFetched({this.loadOnlyNew = false});
+  final bool loadOnlyNew;
+}
