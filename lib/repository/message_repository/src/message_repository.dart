@@ -1,28 +1,98 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:innowatt/repository/message_repository/src/exceptions/exception.dart';
 import 'package:innowatt/repository/message_repository/src/models/models.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MessageRepository {
-  MessageRepository({required this.chatId});
-  final String chatId;
+  MessageRepository({
+    required SharedPreferences prefs,
+    required String chatId,
+    List<Message>? messages,
+  })  : _chatId = chatId,
+        _prefs = prefs,
+        _lastFetchTimestampKey = '__${chatId}_lastFetchTimestamp__',
+        _messagesMapKey = '__${chatId}_messagesMapKey__',
+        _sortedMessages = messages ?? [],
+        _messagesMap = {} {
+    _initChats();
+  }
+  // TODO: remove it:
+  bool _isDisposed = false;
 
   CollectionReference<Message> get _messages => FirebaseFirestore.instance
       .collection('chats')
-      .doc(chatId)
+      .doc(_chatId)
       .collection('messages')
       .withConverter(
           fromFirestore: Message.fromFirestore,
           toFirestore: (Message message, _) => message.toFirestore());
 
-  DocumentSnapshot<Message>? _lastMessage;
+  final SharedPreferences _prefs;
+
+  String get chatId => _chatId;
+
+  final String _chatId;
+  DocumentSnapshot<Message>? _lastDocument;
   bool _hasMoreChats = true;
-  final List<List<Message>> _allPagedMessages = [];
+  final Map<String, Message> _messagesMap;
+  final List<Message> _sortedMessages;
+
   final StreamController<List<Message>> _messagesController =
       StreamController<List<Message>>.broadcast();
+  StreamSubscription? _messageSubscription;
 
   bool get hasMoreChats => _hasMoreChats;
+  Timestamp? _lastFetchTimestamp;
+  final String _lastFetchTimestampKey;
+  final String _messagesMapKey;
+
+  void _initChats() {
+    final savedMessages = _getMessagesMap() ?? <String, Message>{};
+    _messagesMap.addAll(savedMessages);
+    _sortedMessages.addAll(_messagesMap.values);
+    _sortedMessages.sort(
+      (a, b) => b.createdAt.compareTo(a.createdAt),
+    );
+  }
+
+  Future<void> _updateLastFetchTime() async {
+    await _prefs.setInt(
+        _lastFetchTimestampKey, Timestamp.now().microsecondsSinceEpoch);
+  }
+
+  Timestamp _getLastFetchTime() {
+    return Timestamp.fromMicrosecondsSinceEpoch(
+      _prefs.getInt(_lastFetchTimestampKey) ?? 0,
+    );
+  }
+
+  Future<void> _updateMessagesMap() async {
+    final List<String> li = _sortedMessages.map((message) {
+      final messageJson = message.toJson();
+      messageJson['created_at'] = message.createdAt.microsecondsSinceEpoch;
+      return jsonEncode(messageJson);
+    }).toList();
+    final int end = li.length > 20 ? 20 : li.length;
+    await _prefs.setStringList(_messagesMapKey, li.sublist(0, end));
+  }
+
+  Map<String, Message>? _getMessagesMap() {
+    final jsonList = _prefs.getStringList(_messagesMapKey);
+    if (jsonList == null) return null;
+
+    Map<String, Message> result = {};
+    for (var json in jsonList) {
+      final messageJson = jsonDecode(json);
+      messageJson['created_at'] =
+          Timestamp.fromMicrosecondsSinceEpoch(messageJson['created_at']);
+      final message = Message.fromJson(messageJson);
+      result[message.id!] = message;
+    }
+    return result;
+  }
 
   void sendMessage({
     required String text,
@@ -35,63 +105,83 @@ class MessageRepository {
       text: text,
     );
     try {
-      final messages = _messages;
-      messages.doc().set(message);
+      _messages.doc().set(message);
     } on FirebaseException catch (e) {
-      print('#DEBUG IN [sendMessage]#: ERROR(${e.code}): $e');
       throw FirestoreDatabaseFailure.fromCode(e.code);
     } catch (_) {
       throw FirestoreDatabaseFailure();
     }
   }
 
-  void _requestMessages() {
-    var pageMessagesQuery =
-        _messages.orderBy('created_at', descending: true).limit(20);
-    if (_lastMessage != null) {
-      pageMessagesQuery = pageMessagesQuery.startAfterDocument(_lastMessage!);
+  void _requestMessages({bool loadOnlyNew = false}) {
+    print("_isDisposed = $_isDisposed");
+    _messageSubscription?.cancel();
+    var messagesQuery = _messages.orderBy('created_at', descending: true);
+
+    if (loadOnlyNew) {
+      _lastFetchTimestamp ??= _getLastFetchTime();
+      messagesQuery = messagesQuery.where(
+        'created_at',
+        isGreaterThan: _lastFetchTimestamp,
+      );
+    }
+    messagesQuery = messagesQuery.limit(20);
+    if (_lastDocument != null) {
+      messagesQuery = messagesQuery.startAfterDocument(_lastDocument!);
     }
 
     if (!_hasMoreChats) return;
 
-    var currentRequestIndex = _allPagedMessages.length;
-
-    pageMessagesQuery.snapshots().listen((snapshot) {
+    _messageSubscription = messagesQuery.snapshots().listen((snapshot) async {
+      if (snapshot.docs.isEmpty) {
+        _messagesController.add(_sortedMessages);
+      }
       if (snapshot.docs.isNotEmpty) {
         final messages = snapshot.docs.map((e) => e.data()).toList();
+        print("New messages fetched: $messages");
 
-        final pageExists = currentRequestIndex < _allPagedMessages.length;
-
-        if (pageExists) {
-          _allPagedMessages[currentRequestIndex] = messages;
-        } else {
-          _allPagedMessages.add(messages);
+        for (var message in messages) {
+          print("_messagesMap = $_messagesMap");
+          if (_messagesMap.containsKey(message.id!)) {
+            print('Duplicate found = ${_messagesMap[message.id!]}');
+            if (_sortedMessages.remove(message))
+              print('Duplicate found and deleted');
+          }
+          _sortedMessages.insert(0, message);
+          _messagesMap[message.id!] = message;
+          print("New sortedMessages: ${_sortedMessages.map((e) => e.text)}");
         }
 
-        final allMessages = _allPagedMessages.fold<List<Message>>(
-          <Message>[],
-          (initialValue, pageItems) => initialValue..addAll(pageItems),
-        );
-        _messagesController.add(allMessages);
+        _messagesController.add(_sortedMessages);
 
-        if (currentRequestIndex == _allPagedMessages.length - 1) {
-          _lastMessage = snapshot.docs.last;
-        }
+        _lastDocument = snapshot.docs.last;
 
         _hasMoreChats = messages.length == 20;
+
+        _lastFetchTimestamp = Timestamp.now();
+        await _updateLastFetchTime();
+        print("_lastFetchTimestamp updated to $_lastFetchTimestamp");
       }
+    }, onError: (e) {
+      print('Error in messages stream: $e');
     });
   }
 
-  Stream<List<Message>> messagesStream() {
-    _requestMessages();
-    print(
-        'in messagesStream: _allPagedMessages.length=${_allPagedMessages.length}');
+  Stream<List<Message>> messagesStream({bool loadOnlyNew = false}) {
+    _requestMessages(loadOnlyNew: loadOnlyNew);
     return _messagesController.stream;
   }
 
-  Future<bool> get isMessagesEmpty async {
-    final querySnapshot = await _messages.limit(1).get();
-    return querySnapshot.docs.isEmpty;
+  Future<void> dispose() async {
+    _isDisposed = true;
+    await _messageSubscription?.cancel();
+    await _messagesController.close();
+    if (_sortedMessages.isNotEmpty) {
+      try {
+        await _updateMessagesMap();
+      } catch (e) {
+        print('Error while saving messages during dispose(): $e');
+      }
+    }
   }
 }

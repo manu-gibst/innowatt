@@ -28,70 +28,76 @@ class ChatRepository {
 
   final StreamController<List<Chat>> _chatsController =
       StreamController<List<Chat>>.broadcast();
+  StreamSubscription? _chatsSubscription;
 
   bool _hasMoreChats = true;
   DocumentSnapshot<Chat>? _lastDocument;
-  late final Map<String, Chat> _chatsMap;
+  final Map<String, Chat> _chatsMap;
 
   final List<Chat> _sortedChats;
 
   void _initChats() {
-    print("In _initChats()");
     final savedChats = _getChatsMap() ?? <String, Chat>{};
     _chatsMap.addAll(savedChats);
     _sortedChats.addAll(_chatsMap.values);
     _sortedChats.sort(
       (a, b) => b.updatedTime!.compareTo(a.updatedTime!),
     );
-    print("Initial _sortedChats = $_sortedChats");
   }
 
   final SharedPreferences? _prefs;
 
   Timestamp? _lastFetchTimestamp;
-  static const lastFetchTimestampKey = '__lastFetchTimestamp__';
-  static const chatsMapKey = '__chatsMap__';
+  static const _lastFetchTimestampKey = '__lastFetchTimestamp__';
+  static const _chatsMapKey = '__chatsMap__';
 
   bool get hasMoreChats => _hasMoreChats;
 
   Future<void> _updateLastFetchTime() async {
     await _prefs!
-        .setInt(lastFetchTimestampKey, Timestamp.now().microsecondsSinceEpoch);
+        .setInt(_lastFetchTimestampKey, Timestamp.now().microsecondsSinceEpoch);
   }
 
-  Timestamp _getLastFetchTime() {
-    return Timestamp.fromMicrosecondsSinceEpoch(
-      _prefs!.getInt(lastFetchTimestampKey) ?? 0,
-    );
+  Timestamp? _getLastFetchTime() {
+    final lastFetch = _prefs!.getInt(_lastFetchTimestampKey);
+    if (lastFetch == null) return null;
+    return Timestamp.fromMicrosecondsSinceEpoch(lastFetch);
   }
 
-  void _updateChatsMap() {
+  Future<void> _updateChatsMap() async {
     final List<String> li = _sortedChats.map((chat) {
       final chatJson = chat.toJson();
       chatJson['updated_time'] = chat.updatedTime!.microsecondsSinceEpoch;
       return jsonEncode(chatJson);
     }).toList();
-    _prefs!.setStringList(chatsMapKey, li);
+    final int end = li.length > 20 ? 20 : li.length;
+    await _prefs!.setStringList(_chatsMapKey, li.sublist(0, end));
   }
 
   Map<String, Chat>? _getChatsMap() {
-    final jsonList = _prefs!.getStringList(chatsMapKey);
+    final jsonList = _prefs!.getStringList(_chatsMapKey);
     if (jsonList == null) return null;
 
     Map<String, Chat> result = {};
     for (var json in jsonList) {
-      print("in _getChatsMap()");
-      print("json = $json");
       final chatJson = jsonDecode(json);
       chatJson['updated_time'] =
           Timestamp.fromMicrosecondsSinceEpoch(chatJson['updated_time']);
-      print("chatJson = $chatJson");
       final chat = Chat.fromJson(chatJson);
-      print("chat = $chat");
       result[chat.chatId!] = chat;
     }
-    print(result);
     return result;
+  }
+
+  static Future<void> deleteMemory(SharedPreferences prefs) async {
+    await prefs.remove(_lastFetchTimestampKey).then((_) {
+      assert(prefs.get(_lastFetchTimestampKey) == null);
+      print("lastFetchTimestamp removed");
+    });
+    await prefs.remove(_chatsMapKey).then((_) {
+      assert(prefs.get(_chatsMapKey) == null);
+      print("chatsMap removed");
+    });
   }
 
   void addUser({
@@ -107,7 +113,6 @@ class ChatRepository {
     try {
       _usersCollection.doc(user.uid).set(user);
     } on FirebaseException catch (e) {
-      print('#DEBUG IN [addUser]#: ERROR(${e.code}): $e');
       throw FirestoreDatabaseFailure.fromCode(e.code);
     } catch (_) {
       throw FirestoreDatabaseFailure();
@@ -133,7 +138,8 @@ class ChatRepository {
   }
 
   void requestChats({required String uid, bool loadOnlyNew = false}) {
-    print("#DEBUG# loadOnlyNew = $loadOnlyNew");
+    if (_lastFetchTimestamp == null) loadOnlyNew = false;
+
     var chatsQuery = _chatsCollection
         .where("uids", arrayContains: uid)
         .orderBy('updated_time', descending: true)
@@ -151,38 +157,32 @@ class ChatRepository {
 
     if (!_hasMoreChats) return;
 
-    chatsQuery.snapshots().listen((snapshot) {
+    _chatsSubscription = chatsQuery.snapshots().listen((snapshot) async {
       if (snapshot.docs.isEmpty) {
         _chatsController.add(_sortedChats);
       }
       if (snapshot.docs.isNotEmpty) {
-        final newChats = snapshot.docs.map((e) => e.data()).toList();
-        print("New Chats fetched: $newChats");
+        final chats = snapshot.docs.map((e) => e.data()).toList();
 
-        for (var chat in newChats) {
-          print('Checking if _chatsMap has Chat ${chat.chatId!}');
+        for (var chat in chats) {
           if (_chatsMap.containsKey(chat.chatId!)) {
-            if (_sortedChats.remove(chat)) {
-              print("Chat removed successfully; _sortedChats = $_sortedChats");
-            } else {
-              print("Failed to remove chat; _sortedChats = $_sortedChats");
-            }
+            _sortedChats.remove(chat);
           }
           _sortedChats.insert(0, chat);
-          print('_sortedChats = $_sortedChats');
           _chatsMap[chat.chatId!] = chat;
         }
 
         _chatsController.add(_sortedChats);
-        print("#DEBUG# sortedChats = $_sortedChats");
 
         _lastDocument = snapshot.docs.last;
 
-        _hasMoreChats = newChats.length == 20;
+        _hasMoreChats = chats.length == 20;
 
         _lastFetchTimestamp = Timestamp.now();
-        _updateLastFetchTime();
+        await _updateLastFetchTime();
       }
+    }, onError: (e) {
+      print('Error in chats stream: $e');
     });
   }
 
@@ -190,7 +190,6 @@ class ChatRepository {
     required String uid,
     bool loadOnlyNew = false,
   }) {
-    print("In chatsStream");
     requestChats(uid: uid, loadOnlyNew: loadOnlyNew);
     return _chatsController.stream;
   }
@@ -217,8 +216,15 @@ class ChatRepository {
     _chatsCollection.doc(chatId).update({'updated_time': Timestamp.now()});
   }
 
-  void dispose() {
-    _chatsController.close();
-    _updateChatsMap();
+  Future<void> dispose() async {
+    await _chatsSubscription?.cancel();
+    await _chatsController.close();
+    if (_sortedChats.isNotEmpty && _prefs != null) {
+      try {
+        await _updateChatsMap();
+      } catch (e) {
+        print('Error while saving chats during dispose(): $e');
+      }
+    }
   }
 }

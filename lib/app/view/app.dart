@@ -60,7 +60,9 @@ class HomePage extends StatelessWidget {
         title: const Text('HomePage'),
         actions: [
           IconButton(
-            onPressed: context.read<AuthenticationRepository>().logOut,
+            onPressed: () {
+              context.read<AppBloc>().add(AppLogoutPressed());
+            },
             icon: const Icon(Icons.exit_to_app),
           ),
         ],

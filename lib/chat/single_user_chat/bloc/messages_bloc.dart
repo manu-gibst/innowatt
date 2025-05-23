@@ -30,6 +30,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     );
     on<MessageSent>(_onSent);
   }
+
   final MessageRepository _messageRepository;
   final ChatRepository _chatRepository;
 
@@ -38,16 +39,9 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     Emitter<MessagesState> emit,
   ) async {
     if (state.hasReachedMax) return;
-    if (state.status == MessagesStatus.initial) {
-      if (await _messageRepository.isMessagesEmpty) {
-        return emit(state.copyWith(
-          status: MessagesStatus.success,
-          messages: [],
-        ));
-      }
-    }
     try {
-      await emit.forEach(_messageRepository.messagesStream(),
+      await emit.forEach(
+          _messageRepository.messagesStream(loadOnlyNew: event.loadOnlyNew),
           onData: (messages) {
         return state.copyWith(
           status: MessagesStatus.success,
@@ -70,5 +64,12 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
       chatId: _messageRepository.chatId,
     );
     _chatRepository.updateCreatedTime(chatId: _messageRepository.chatId);
+  }
+
+  @override
+  Future<void> close() async {
+    await _messageRepository.dispose();
+    await _chatRepository.dispose();
+    return super.close();
   }
 }

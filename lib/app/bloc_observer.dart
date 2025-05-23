@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:bloc/bloc.dart';
 
 class AppBlocObserver extends BlocObserver {
@@ -22,5 +24,11 @@ class AppBlocObserver extends BlocObserver {
   ) {
     super.onTransition(bloc, transition);
     print(transition);
+  }
+
+  @override
+  void onEvent(Bloc bloc, Object? event) {
+    print(event);
+    super.onEvent(bloc, event);
   }
 }

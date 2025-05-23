@@ -23,6 +23,7 @@ class ChatListBuilder extends StatelessWidget {
         itemCount: messages.length,
         itemBuilder: (context, index) {
           return MessageBubble(
+            key: Key('__${messages[index].id!}_messageBubbleKey__'),
             message: messages[index],
             prevDifferent: messages[index].isDifferent(
                 index < messages.length - 1 ? messages[index + 1] : null),

@@ -63,14 +63,13 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
         },
       );
     } catch (e) {
-      print(e);
       emit(state.copyWith(status: ChatListStatus.failure));
     }
   }
 
   @override
-  Future<void> close() {
-    _chatRepository.dispose();
+  Future<void> close() async {
+    await _chatRepository.dispose();
     return super.close();
   }
 }

@@ -20,6 +20,7 @@ class AllChatsScreen extends StatefulWidget {
 class _AllChatsScreenState extends State<AllChatsScreen> {
   late final SharedPreferences _prefs;
   bool _isLoading = true;
+
   @override
   void initState() {
     _initPrefs();
@@ -35,7 +36,6 @@ class _AllChatsScreenState extends State<AllChatsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("in AttChatsScreen build()");
     if (_isLoading) return const CircularProgressIndicator();
     return BlocProvider(
       lazy: false,
@@ -66,7 +66,6 @@ class _AllChatsViewState extends State<AllChatsView> {
 
   @override
   Widget build(BuildContext context) {
-    print("in AllChatsView build()");
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chat'),
@@ -99,7 +98,7 @@ class _AllChatsViewState extends State<AllChatsView> {
                         : Container();
                   } else {
                     return ChatListItem(
-                        key: Key(chats[index].chatId.toString()),
+                        key: Key("__${chats[index].chatId}_chatTileKey__"),
                         chat: chats[index]);
                   }
                 },

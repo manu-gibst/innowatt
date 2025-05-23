@@ -7,7 +7,10 @@ sealed class MessagesEvent extends Equatable {
   List<Object> get props => [];
 }
 
-final class MessagesFetched extends MessagesEvent {}
+final class MessagesFetched extends MessagesEvent {
+  const MessagesFetched({this.loadOnlyNew = false});
+  final bool loadOnlyNew;
+}
 
 final class MessageSent extends MessagesEvent {
   const MessageSent({
