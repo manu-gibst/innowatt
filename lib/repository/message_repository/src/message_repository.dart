@@ -19,8 +19,6 @@ class MessageRepository {
         _messagesMap = {} {
     _initChats();
   }
-  // TODO: remove it:
-  bool _isDisposed = false;
 
   CollectionReference<Message> get _messages => FirebaseFirestore.instance
       .collection('chats')
@@ -114,8 +112,6 @@ class MessageRepository {
   }
 
   void _requestMessages({bool loadOnlyNew = false}) {
-    print("_isDisposed = $_isDisposed");
-    _messageSubscription?.cancel();
     var messagesQuery = _messages.orderBy('created_at', descending: true);
 
     if (loadOnlyNew) {
@@ -138,18 +134,12 @@ class MessageRepository {
       }
       if (snapshot.docs.isNotEmpty) {
         final messages = snapshot.docs.map((e) => e.data()).toList();
-        print("New messages fetched: $messages");
 
         for (var message in messages) {
-          print("_messagesMap = $_messagesMap");
-          if (_messagesMap.containsKey(message.id!)) {
-            print('Duplicate found = ${_messagesMap[message.id!]}');
-            if (_sortedMessages.remove(message))
-              print('Duplicate found and deleted');
+          if (!_messagesMap.containsKey(message.id!)) {
+            _sortedMessages.insert(0, message);
+            _messagesMap[message.id!] = message;
           }
-          _sortedMessages.insert(0, message);
-          _messagesMap[message.id!] = message;
-          print("New sortedMessages: ${_sortedMessages.map((e) => e.text)}");
         }
 
         _messagesController.add(_sortedMessages);
@@ -160,10 +150,7 @@ class MessageRepository {
 
         _lastFetchTimestamp = Timestamp.now();
         await _updateLastFetchTime();
-        print("_lastFetchTimestamp updated to $_lastFetchTimestamp");
       }
-    }, onError: (e) {
-      print('Error in messages stream: $e');
     });
   }
 
@@ -173,7 +160,6 @@ class MessageRepository {
   }
 
   Future<void> dispose() async {
-    _isDisposed = true;
     await _messageSubscription?.cancel();
     await _messagesController.close();
     if (_sortedMessages.isNotEmpty) {

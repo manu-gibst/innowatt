@@ -30,7 +30,12 @@ final class MessagesState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [chat, messages, status, hasReachedMax];
+  List<Object?> get props => [
+        chat,
+        messages,
+        status,
+        hasReachedMax,
+      ];
 
   @override
   String toString() =>

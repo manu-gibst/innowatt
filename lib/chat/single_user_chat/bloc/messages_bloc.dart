@@ -43,9 +43,10 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
       await emit.forEach(
           _messageRepository.messagesStream(loadOnlyNew: event.loadOnlyNew),
           onData: (messages) {
+        print('onData: ${messages.map((e) => e.text)}');
         return state.copyWith(
           status: MessagesStatus.success,
-          messages: messages,
+          messages: List<Message>.from(messages),
           hasReachedMax: !_messageRepository.hasMoreChats,
         );
       });
