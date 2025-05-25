@@ -7,13 +7,11 @@ final class MessagesState extends Equatable {
     this.chat = Chat.empty,
     this.messages,
     this.status = MessagesStatus.initial,
-    this.hasReachedMax = false,
   });
 
   final Chat chat;
   final List<Message>? messages;
   final MessagesStatus status;
-  final bool hasReachedMax;
 
   MessagesState copyWith({
     Chat? chat,
@@ -25,7 +23,6 @@ final class MessagesState extends Equatable {
       chat: chat ?? this.chat,
       messages: messages ?? this.messages,
       status: status ?? this.status,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
     );
   }
 
@@ -34,10 +31,9 @@ final class MessagesState extends Equatable {
         chat,
         messages,
         status,
-        hasReachedMax,
       ];
 
   @override
   String toString() =>
-      'MessageState { number of messages: ${messages?.length}, status: $status, hasReachedMax: $hasReachedMax }';
+      'MessageState { number of messages: ${messages?.length}, status: $status }';
 }

@@ -42,7 +42,6 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     MessagesFetched event,
     Emitter<MessagesState> emit,
   ) async {
-    if (state.hasReachedMax) return;
     try {
       return emit.forEach(_messageRepository.getMessageStream(),
           onData: (data) {

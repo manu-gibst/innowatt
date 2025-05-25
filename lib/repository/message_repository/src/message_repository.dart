@@ -61,26 +61,6 @@ class MessageRepository {
     }
   }
 
-  FirestoreCollection getFirestoreCollection() {
-    return FirestoreCollection(
-      collection: FirebaseFirestore.instance
-          .collection('chats')
-          .doc(_chatId)
-          .collection('messages'),
-      initializeOnStart: true,
-      pageSize: 20,
-      serverOnly: false,
-      live: true,
-      queryList: [
-        FirebaseFirestore.instance
-            .collection('chats')
-            .doc(_chatId)
-            .collection('messages')
-      ],
-      queryOrder: QueryOrder(orderField: 'created_at'),
-    );
-  }
-
   Stream<List<Message>> getMessageStream() {
     return _dynamicCollection.stream.map((snapshots) {
       if (snapshots == null || snapshots.isEmpty) return <Message>[];
