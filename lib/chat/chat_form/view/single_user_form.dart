@@ -27,8 +27,10 @@ class SingleUserPopup<T> extends PopupRoute<T> {
         child: UnconstrainedBox(
           child: BlocProvider(
             create: (context) {
+              final uid =
+                  context.read<AuthenticationRepository>().currentUser.id;
               return ChatFormCubit(
-                chatRepository: ChatRepository(),
+                chatRepository: ChatRepository(uid: uid),
                 authenticationRepository:
                     context.read<AuthenticationRepository>(),
               );

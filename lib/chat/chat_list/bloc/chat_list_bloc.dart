@@ -1,4 +1,3 @@
-import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -21,9 +20,7 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
 class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
   ChatListBloc({
     required ChatRepository chatRepository,
-    required AuthenticationRepository authenticationRepository,
-  })  : _authenticationRepository = authenticationRepository,
-        _chatRepository = chatRepository,
+  })  : _chatRepository = chatRepository,
         super(ChatListState()) {
     on<ChatListSingleUserChatCreated>(_onSingleUserChatCreated);
     on<ChatListFetched>(
@@ -33,7 +30,6 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
   }
 
   final ChatRepository _chatRepository;
-  final AuthenticationRepository _authenticationRepository;
 
   void _onSingleUserChatCreated(
     ChatListSingleUserChatCreated event,
@@ -49,16 +45,13 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
     ChatListFetched event,
     Emitter<ChatListState> emit,
   ) async {
-    if (state.hasReachedMax) return;
     try {
-      final uid = _authenticationRepository.currentUser.id;
       await emit.forEach(
-        _chatRepository.chatsStream(uid: uid, loadOnlyNew: event.loadOnlyNew),
+        _chatRepository.chatsStream(),
         onData: (chats) {
           return state.copyWith(
             status: ChatListStatus.success,
             chats: chats,
-            hasReachedMax: !_chatRepository.hasMoreChats,
           );
         },
       );

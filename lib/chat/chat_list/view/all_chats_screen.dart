@@ -8,40 +8,17 @@ import 'package:innowatt/chat/chat_list/view/bottom_loader.dart';
 import 'package:innowatt/chat/chat_list/view/chat_list_item.dart';
 import 'package:innowatt/core/widgets/error_card.dart';
 import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class AllChatsScreen extends StatefulWidget {
+class AllChatsScreen extends StatelessWidget {
   const AllChatsScreen({super.key});
 
   @override
-  State<AllChatsScreen> createState() => _AllChatsScreenState();
-}
-
-class _AllChatsScreenState extends State<AllChatsScreen> {
-  late final SharedPreferences _prefs;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    _initPrefs();
-    super.initState();
-  }
-
-  Future<void> _initPrefs() async {
-    _prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const CircularProgressIndicator();
+    final uid = context.read<AuthenticationRepository>().currentUser.id;
     return BlocProvider(
       lazy: false,
       create: (context) => ChatListBloc(
-        chatRepository: ChatRepository(prefs: _prefs),
-        authenticationRepository: context.read<AuthenticationRepository>(),
+        chatRepository: ChatRepository(uid: uid),
       )..add(ChatListFetched(loadOnlyNew: true)),
       child: const AllChatsView(),
     );

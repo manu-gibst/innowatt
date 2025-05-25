@@ -6,9 +6,8 @@ import 'package:innowatt/chat/single_user_chat/view/chat_list_builder.dart';
 import 'package:innowatt/core/widgets/error_card.dart';
 import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
 import 'package:innowatt/repository/message_repository/message_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class SingleUserChatScreen extends StatefulWidget {
+class SingleUserChatScreen extends StatelessWidget {
   const SingleUserChatScreen({
     super.key,
     required this.chatId,
@@ -19,41 +18,17 @@ class SingleUserChatScreen extends StatefulWidget {
   final String chatName;
 
   @override
-  State<SingleUserChatScreen> createState() => _SingleUserChatScreenState();
-}
-
-class _SingleUserChatScreenState extends State<SingleUserChatScreen> {
-  late final SharedPreferences _prefs;
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    _initPrefs();
-    super.initState();
-  }
-
-  Future<void> _initPrefs() async {
-    _prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _isLoading = false;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_isLoading) return const CircularProgressIndicator();
+    final uid = context.read<AuthenticationRepository>().currentUser.id;
     return BlocProvider(
       lazy: false,
       create: (context) => MessagesBloc(
-        messageRepository: MessageRepository(
-          chatId: widget.chatId,
-          prefs: _prefs,
-        ),
-        chatRepository: ChatRepository(),
+        messageRepository: MessageRepository(chatId: chatId),
+        chatRepository: ChatRepository(uid: uid),
       )..add(MessagesFetched()),
       child: SingleUserChatView(
-        chatId: widget.chatId,
-        chatName: widget.chatName,
+        chatId: chatId,
+        chatName: chatName,
       ),
     );
   }

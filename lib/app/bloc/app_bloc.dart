@@ -2,9 +2,6 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:innowatt/repository/chat_repository/chat_repository.dart'
-    show ChatRepository;
-import 'package:shared_preferences/shared_preferences.dart';
 
 part 'app_event.dart';
 part 'app_state.dart';
@@ -40,8 +37,6 @@ class AppBloc extends Bloc<AppEvent, AppState> with ChangeNotifier {
     print("_onLogoutPressed");
     try {
       await _authenticationRepository.logOut();
-      final prefs = await SharedPreferences.getInstance();
-      await ChatRepository.deleteMemory(prefs);
     } catch (e) {
       print("Error during logout: $e");
     } finally {

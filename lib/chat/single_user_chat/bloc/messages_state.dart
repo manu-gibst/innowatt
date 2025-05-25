@@ -17,7 +17,6 @@ final class MessagesState extends Equatable {
     Chat? chat,
     List<Message>? messages,
     MessagesStatus? status,
-    bool? hasReachedMax,
   }) {
     return MessagesState(
       chat: chat ?? this.chat,
