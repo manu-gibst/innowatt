@@ -50,7 +50,7 @@ class _SingleUserChatScreenState extends State<SingleUserChatScreen> {
           prefs: _prefs,
         ),
         chatRepository: ChatRepository(),
-      )..add(MessagesFetched(loadOnlyNew: true)),
+      )..add(MessagesFetched()),
       child: SingleUserChatView(
         chatId: widget.chatId,
         chatName: widget.chatName,
@@ -145,15 +145,14 @@ class _SingleUserChatViewState extends State<SingleUserChatView> {
 
   void _onScroll() {
     if (_isTop) {
-      context.read<MessagesBloc>().add(MessagesFetched(loadOnlyNew: false));
+      context.read<MessagesBloc>().add(MessagesNextPageRequested());
     }
   }
 
   bool get _isTop {
     if (!_scrollController.hasClients) return false;
-    final maxScroll = _scrollController.position.minScrollExtent;
     final currentScroll = _scrollController.offset;
-    return currentScroll >= (maxScroll * 0.9);
+    return currentScroll <= 50;
   }
 
   @override

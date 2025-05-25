@@ -25,10 +25,14 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
         _chatRepository = chatRepository,
         super(MessagesState()) {
     on<MessagesFetched>(
-      _onFetched,
-      // transformer: throttleDroppable(throttleDuration),
+      (event, emit) async {
+        print("MessagesFetched() called");
+        await _onFetched(event, emit);
+      },
+      transformer: throttleDroppable(throttleDuration),
     );
     on<MessageSent>(_onSent);
+    on<MessagesNextPageRequested>(_onNextPageRequested);
   }
 
   final MessageRepository _messageRepository;
@@ -40,19 +44,24 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
   ) async {
     if (state.hasReachedMax) return;
     try {
-      await emit.forEach(
-          _messageRepository.messagesStream(loadOnlyNew: event.loadOnlyNew),
-          onData: (messages) {
-        print('onData: ${messages.map((e) => e.text)}');
+      return emit.forEach(_messageRepository.getMessageStream(),
+          onData: (data) {
         return state.copyWith(
           status: MessagesStatus.success,
-          messages: List<Message>.from(messages),
-          hasReachedMax: !_messageRepository.hasMoreChats,
+          messages: data,
         );
       });
-    } catch (_) {
+    } catch (e) {
+      print("Error during fetching messages: $e");
       emit(state.copyWith(status: MessagesStatus.failure));
     }
+  }
+
+  void _onNextPageRequested(
+    MessagesNextPageRequested event,
+    Emitter<MessagesState> emit,
+  ) {
+    _messageRepository.requestNextPage();
   }
 
   void _onSent(
