@@ -37,6 +37,8 @@ dependencies:
     path: packages/form_inputs
   firestore_collection:
     path: packages/firestore_collection
+  ai_repository:
+    path: packages/ai_repository
   formz: ^0.8.0
   go_router: ^14.6.2
   font_awesome_flutter: ^10.8.0
@@ -45,6 +47,7 @@ dependencies:
   bloc_concurrency: ^0.2.5
   scroll_to_index: ^3.0.1
   shared_preferences: ^2.5.3
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -60,3 +63,4 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/.env

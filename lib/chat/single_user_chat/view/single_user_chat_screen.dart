@@ -1,6 +1,8 @@
+import 'package:ai_repository/ai_repository.dart';
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:innowatt/chat/single_user_chat/bloc/messages_bloc.dart';
 import 'package:innowatt/chat/single_user_chat/view/chat_list_builder.dart';
 import 'package:innowatt/core/widgets/error_card.dart';
@@ -25,6 +27,8 @@ class SingleUserChatScreen extends StatelessWidget {
       create: (context) => MessagesBloc(
         messageRepository: MessageRepository(chatId: chatId),
         chatRepository: ChatRepository(uid: uid),
+        authenticationRepository: context.read<AuthenticationRepository>(),
+        aiRepository: AiRepository(baseUrl: dotenv.env['FRONTEND_URL']!),
       )..add(MessagesFetched()),
       child: SingleUserChatView(
         chatId: chatId,

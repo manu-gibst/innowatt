@@ -163,7 +163,7 @@ class AuthenticationRepository {
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
 
-  /// Whether or not the current environment is web
+  /// Whether or not the current environment is web.
   /// Should only be overridden for testing purposes. Otherwise,
   /// defaults to [kIsWeb]
   @visibleForTesting
@@ -182,6 +182,10 @@ class AuthenticationRepository {
       _cache.write(key: userCacheKey, value: user);
       return user;
     });
+  }
+
+  Future<String?> getIdToken () async {
+    return await _firebaseAuth.currentUser?.getIdToken();
   }
 
   /// Returns the current cached user.

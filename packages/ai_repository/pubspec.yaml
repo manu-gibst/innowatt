@@ -1,5 +1,5 @@
 name: ai_repository
-description: "A new Flutter package project."
+description: "Repository that provites connection to backend AI."
 version: 0.0.1
 homepage:
 
@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^1.4.0
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -22,9 +23,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
-  # To add assets to your package, add an assets section, like this:
-  # assets:
+  assets:
+    - assets/.env
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
   #

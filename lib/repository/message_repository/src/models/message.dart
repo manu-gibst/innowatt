@@ -11,7 +11,10 @@ Timestamp? _firestoreTimestampFromJson(dynamic value) {
 }
 
 /// This method only stores the "timestamp" data type back in the Firestore
-dynamic _firestoreTimestampToJson(dynamic value) => value;
+dynamic _firestoreTimestampToJson(dynamic value) {
+  if (value is Timestamp) return value.microsecondsSinceEpoch;
+  throw FormatException('Invalid timestamp format: $value');
+}
 
 @JsonSerializable()
 class Message {

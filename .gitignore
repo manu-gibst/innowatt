@@ -12,6 +12,7 @@ migrate_working_dir/
 
 # Secutity
 *.env
+.env
 
 # IntelliJ related
 *.iml

@@ -69,18 +69,12 @@ class _AllChatsViewState extends State<AllChatsView> {
               }
               return ListView.separated(
                 itemBuilder: (context, index) {
-                  if (index >= chats.length) {
-                    return chats.length == 20
-                        ? const EmptyLoader()
-                        : Container();
-                  } else {
-                    return ChatListItem(
-                        key: Key("__${chats[index].chatId}_chatTileKey__"),
-                        chat: chats[index]);
-                  }
+                  return ChatListItem(
+                      key: Key("__${chats[index].chatId}_chatTileKey__"),
+                      chat: chats[index]);
                 },
                 itemCount:
-                    state.hasReachedMax ? chats.length : chats.length + 1,
+                    chats.length,
                 separatorBuilder: (context, index) => Divider(
                   color: Theme.of(context).colorScheme.surfaceContainer,
                 ),

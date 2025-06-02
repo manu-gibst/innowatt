@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:ai_repository/ai_repository.dart';
+import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
@@ -18,11 +22,15 @@ EventTransformer<E> throttleDroppable<E>(Duration duration) {
 }
 
 class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
-  MessagesBloc(
-      {required MessageRepository messageRepository,
-      required ChatRepository chatRepository})
-      : _messageRepository = messageRepository,
+  MessagesBloc({
+    required MessageRepository messageRepository,
+    required ChatRepository chatRepository,
+    required AiRepository aiRepository,
+    required AuthenticationRepository authenticationRepository,
+  })  : _messageRepository = messageRepository,
         _chatRepository = chatRepository,
+        _aiRepository = aiRepository,
+        _authenticationRepository = authenticationRepository,
         super(MessagesState()) {
     on<MessagesFetched>(
       (event, emit) async {
@@ -37,6 +45,8 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
 
   final MessageRepository _messageRepository;
   final ChatRepository _chatRepository;
+  final AiRepository _aiRepository;
+  final AuthenticationRepository _authenticationRepository;
 
   Future<void> _onFetched(
     MessagesFetched event,
@@ -63,10 +73,21 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     _messageRepository.requestNextPage();
   }
 
-  void _onSent(
+  Future<void> _onSent(
     MessageSent event,
     Emitter<MessagesState> emit,
-  ) {
+  ) async {
+    final userToken = await _authenticationRepository.getIdToken();
+    final result = await _aiRepository.generateResponse(
+      userToken: userToken!,
+      chatId: _messageRepository.chatId,
+      lastMessages: state.messages!.map((e) => jsonEncode(e.toJson())).toList(),
+      summary: '',
+    );
+    print(result);
+    return;
+
+
     _messageRepository.sendMessage(
       text: event.text,
       authorId: event.authorId,
