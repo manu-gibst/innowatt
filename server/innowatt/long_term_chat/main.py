@@ -1,6 +1,13 @@
 # from innowatt.long_term_chat.config import graph
 from config import graph
 
+
+"""
+All of the code in this folder is from this tutorial:
+https://python.langchain.com/docs/versions/migrating_memory/long_term_memory_agent/
+"""
+
+
 def pretty_print_stream_chunk(chunk):
     for node, updates in chunk.items():
         print(f"Update from node: {node}")
