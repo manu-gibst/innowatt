@@ -2,7 +2,6 @@ import tiktoken
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.messages import get_buffer_string
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from langchain_core.vectorstores import InMemoryVectorStore
@@ -74,7 +73,7 @@ class State(MessagesState):
 model = ChatOpenAI(model="gpt-4.1-nano")
 model_with_tools = model.bind_tools(tools)
 
-tokenizer = tiktoken.encoding_for_model("gpt-4.1-nano")
+tokenizer = tiktoken.encoding_for_model("gpt-4o")
 
 def agent(state: State) -> State:
     """Process the current state and generate a response using LLM
@@ -144,3 +143,20 @@ builder.add_edge("tools", "agent")
 memory = MemorySaver()
 graph = builder.compile(checkpointer=memory)
 
+def pretty_print_stream_chunk(chunk):
+    for node, updates in chunk.items():
+        print(f"Update from node: {node}")
+        if "messages" in updates:
+            updates["messages"][-1].pretty_print()
+        else:
+            print(updates)
+
+        print("\n")
+
+config = {"configurable": {"user_id": "1", "thread_id": "1"}}
+
+for chunk in graph.stream({"messages": [("user", "i love pizza")]}, config=config):
+    pretty_print_stream_chunk(chunk)
+
+for chunk in graph.stream({"messages": [("user", "what do you know about me?")]}, config=config):
+    pretty_print_stream_chunk(chunk)
