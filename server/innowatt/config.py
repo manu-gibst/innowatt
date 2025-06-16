@@ -6,14 +6,13 @@ from functools import lru_cache
 import os
 from pydantic_settings import BaseSettings
 from typing import Annotated, Optional, List
-import tiktoken
 
 from innowatt.models import Message
-from gemini import Gemini
-from prompts import system_instruction, compression_prompt_template
-from knowledge_base import retrieve_context
-from firestore import Firestore
-from func_tokens import estimate_tokens
+from innowatt.gemini import Gemini
+from innowatt.prompts import compression_prompt_template
+from innowatt.knowledge_base import retrieve_context
+from innowatt.firestore import Firestore
+from innowatt.func_tokens import estimate_tokens
 
 bearer_scheme = HTTPBearer(auto_error=False)
 

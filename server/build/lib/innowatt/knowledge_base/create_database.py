@@ -13,6 +13,13 @@ import os
 import shutil
 import pathlib
 
+
+# ----------------------------------------------------------------------------
+# Whenever the folder `data` changes, run this python file again to generate
+# a vector store
+# ----------------------------------------------------------------------------
+
+
 basedir = pathlib.Path(__file__).parents[2]
 # Load environment variables. Assumes that project contains .env file with API keys
 load_dotenv(basedir / ".env")
@@ -27,8 +34,11 @@ def get_list_of_suffix_files(data_path, suffix) -> list[str]:
     files = [ filename for filename in filenames if filename.endswith( suffix ) ]
     return [data_path + i for i in files]
 
-CHROMA_PATH = "chroma-vector-store"
-DATA_PATH = "data/startup_knowledge/"
+curr_dir = pathlib.Path(__file__).parents[0]
+
+CHROMA_PATH = curr_dir.as_posix() + "/chroma"
+DATA_PATH = curr_dir.as_posix() + "/data/startup_knowledge/"
+
 MD_PATHS = get_list_of_suffix_files(DATA_PATH, ".md")
 CSV_PATHS = get_list_of_suffix_files(DATA_PATH, ".csv")
 PDF_PATHS = get_list_of_suffix_files(DATA_PATH, ".pdf")

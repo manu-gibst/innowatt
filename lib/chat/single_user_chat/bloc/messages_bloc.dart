@@ -81,12 +81,12 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     final result = await _aiRepository.generateResponse(
       userToken: userToken!,
       chatId: _messageRepository.chatId,
-      lastMessages: state.messages!.map((e) => jsonEncode(e.toJson())).toList(),
-      summary: '',
+      lastMessages:
+          state.messages!.map((e) => e.toJson()).toList().sublist(0, 2),
+      summary: 'empty',
     );
     print(result);
     return;
-
 
     _messageRepository.sendMessage(
       text: event.text,

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 
 from typing import Annotated, List
+import time
 
-from innowatt.config import get_firebase_user_from_token, parse_messages
-from innowatt.chat_engine import ChatEngine
+from innowatt.config import Chat, get_firebase_user_from_token
 from innowatt.models import Message
 
 router = APIRouter()
@@ -25,10 +26,17 @@ def test(message: Message):
 @router.post("/{chatid}/generate-response")
 async def get_response(chatid: str, last_messages: List[Message], summary: str, user: Annotated[dict, Depends(get_firebase_user_from_token)]):
     """generates AI response based on [last_messages] and [summary]"""
-    chat_engine = ChatEngine()
-    print(last_messages)
-    parsed_messages = parse_messages(last_messages)
-    print("\n\n")
-    print(parsed_messages)
-    return {"details": "success"}
-    # chat_engine.generate_response(query=last_messages[0], last_messages=last_messages)
+    chat = Chat(chat_id=chatid, last_messages=last_messages)
+    return StreamingResponse(
+        chat.generate_stream_response(),
+        media_type="text/plain",
+    )
+
+def test():
+    for i in range(5):
+        yield f"Chunk {i+1}\n"
+        time.sleep(1)
+
+@router.post("/test_stream")
+async def test_stream():
+    return StreamingResponse(test(), media_type="text/plain")

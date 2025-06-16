@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 import pathlib
 
-from prompts import system_instruction
+from innowatt.prompts import system_instruction
 
 basedir = pathlib.Path(__file__).parents[1]
 load_dotenv()

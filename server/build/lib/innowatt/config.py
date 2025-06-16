@@ -1,31 +1,18 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin.auth import verify_id_token
-from llmlingua import PromptCompressor
-from openai import OpenAI
 
-from dotenv import load_dotenv
 from functools import lru_cache
 import os
-import pathlib
 from pydantic_settings import BaseSettings
 from typing import Annotated, Optional, List
-import getpass
 
 from innowatt.models import Message
-from prompts import system_instruction
-
-basedir = pathlib.Path(__file__).parents[1]
-load_dotenv(basedir / ".env")
-
-def _set_env(var: str):
-    if not os.environ.get(var):
-        os.environ[var] = getpass.getpass(f'{var}: ')
-
-_set_env("OPENAI_API_KEY")
-
-openAi = OpenAI()
-
+from innowatt.gemini import Gemini
+from innowatt.prompts import compression_prompt_template
+from innowatt.knowledge_base import retrieve_context
+from innowatt.firestore import Firestore
+from innowatt.func_tokens import estimate_tokens
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -63,41 +50,39 @@ def get_firebase_user_from_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-def _parse_messages(messages:list[Message]):
+def _parse_messages(messages:list[Message]) -> List[str]:
     result = []
     for message in messages:
         # TODO: make "author_name: message" instead of author_id
         result.append(f"{message.author_id}: {message.text}")
     return result
 
-def compress_prompt(query:str, last_messages:List[Message], summary:str):
-    llm_lingua = PromptCompressor()
+class Chat():
+    def __init__(self, chat_id:str, last_messages:List[Message]):
+        self.firestore = Firestore(chat_id)
+        self.last_messages = _parse_messages(last_messages)
 
-    last_messages = _parse_messages(last_messages)
+    def _get_summary(self) -> str:
+        return self.firestore.get_summary()
 
-    # TODO: assess if this max token limit is enough and how much it will cost on average
-    compressed_prompt = llm_lingua.compress_prompt(
-        f"Chat Summary: {summary}\n\nLast Messages:\n{"\n".join(last_messages)}",
-        instruction=system_instruction,
-        question=query,
-        target_token=500,
-        condition_compare=True,
-        condition_in_question="after",
-        use_sentence_level_filter=False,
-        context_budget="+100",
-        dynamic_context_compression_ratio=0.4,
-        reorder_context="sort",
-    )
+    def _update_summary(self, new_summary:str):
+        self.firestore.update_summary(new_summary)
 
-    print(f"{compressed_prompt=:}")
-    response = openAi.responses.create(
-        model="gpt-4o",
-        instructions=system_instruction,
-        input=compressed_prompt["compressed_prompt"],
-        max_output_tokens=500,
-        temperature=0,
-        top_p=1,
-        stream=False,
-    )
-    print(f"{response=:}")
-    return response.output_text
+    def _distill_prompt(self, query:str) -> str:
+        prompt = compression_prompt_template.format(
+            query=query,
+            summary=self._get_summary(),
+            last_messages=self.last_messages,
+            context=retrieve_context(query),
+        )
+        
+        return Gemini().generate_response(prompt, model_is_pro=False)
+    
+    def get_response(self, query:str) -> str:
+        prompt = self._distill_prompt(query)
+        return Gemini().generate_response(prompt)
+    
+    async def generate_stream_response(self, query:str) -> str:
+        prompt = self._distill_prompt(query)
+        return Gemini().generate_stream_response(prompt)
+    

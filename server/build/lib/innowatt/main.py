@@ -1,10 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import firebase_admin
-import uvicorn
 
-from pydantic import BaseModel
-from typing import Union
 from dotenv import load_dotenv
 import pathlib
 
@@ -26,5 +23,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-firebase_admin.initialize_app()

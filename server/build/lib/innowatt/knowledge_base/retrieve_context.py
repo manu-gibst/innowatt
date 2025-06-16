@@ -4,7 +4,9 @@ from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
 import pathlib
 
-CHROMA_PATH = "chroma-vector-store"
+curr_dir = pathlib.Path(__file__).parents[0]
+
+CHROMA_PATH = curr_dir.as_posix() + "/chroma"
 
 basedir = pathlib.Path(__file__).parents[2]
 load_dotenv(basedir / ".env")
@@ -20,10 +22,9 @@ def retrieve_context(query:str) -> str:
     Returns:
         str: A relevant information or message about no context
     """
-    docs = db.similarity_search_with_relevance_scores(query, k = 3)
 
-    for doc, score in docs:
-        print(f"Document({score}: {doc}\n\n")
+    docs = db.similarity_search_with_relevance_scores(query, k = 3)
+    
     if len(docs) == 0 or docs[0][1] < 0.7:
         # relevant information wasn't found
         return "Don't use any context, the user asked question not directly" \
