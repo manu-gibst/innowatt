@@ -3,6 +3,7 @@ innowatt/__init__.py
 innowatt/config.py
 innowatt/constants.py
 innowatt/main.py
+innowatt/prompts.py
 innowatt/router.py
 innowatt.egg-info/PKG-INFO
 innowatt.egg-info/SOURCES.txt
@@ -13,6 +14,9 @@ innowatt/chat_engine/chat_engine.py
 innowatt/chat_engine/gemini.py
 innowatt/firestore/__init__.py
 innowatt/firestore/firestore.py
+innowatt/knowledge_base/__init__.py
+innowatt/knowledge_base/create_database.py
+innowatt/knowledge_base/retrieve_context.py
 innowatt/long_term_chat/agent.py
 innowatt/long_term_chat/config.py
 innowatt/long_term_chat/main.py
