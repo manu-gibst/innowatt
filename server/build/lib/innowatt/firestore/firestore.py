@@ -29,9 +29,9 @@ class Firestore():
             )
         self.messages.document().set(message.to_dict())
 
-        self.update_messages_count(1 + self.messages_count())
+        self._update_messages_count(1 + self.messages_count())
 
-    def update_messages_count(self, messages_count:int):
+    def _update_messages_count(self, messages_count:int):
         '''Updated number messages field in Firestore'''
         self.chat.update({"message_count": messages_count})
 

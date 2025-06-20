@@ -79,10 +79,14 @@ class Chat():
         return Gemini().generate_response(prompt, model_is_pro=False)
     
     def get_response(self, query:str) -> str:
+        """Generate a response in sync"""
         prompt = self._distill_prompt(query)
-        return Gemini().generate_response(prompt)
+        result = Gemini().generate_response(prompt)
+        self.firestore.send_message(result)
+        return result
     
     async def generate_stream_response(self, query:str) -> str:
+        """Generate a streaming response in async"""
         prompt = self._distill_prompt(query)
         return Gemini().generate_stream_response(prompt)
     

@@ -9,7 +9,7 @@ from innowatt.prompts import system_instruction
 
 basedir = pathlib.Path(__file__).parents[1]
 load_dotenv()
-api_key = os.getenv("GEMINI_API")
+api_key = os.getenv("GEMINI_API_KEY")
 
 light_model = "gemini-1.5-flash-8b"
 pro_model = "gemini-1.5-flash"
