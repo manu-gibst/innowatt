@@ -21,8 +21,6 @@ class ChatListBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("messages.length = ${messages.length}");
-    print("pinnedMessage = $pinnedMessage");
     final shift = pinnedMessage != null ? 1 : 0;
     return _WidgetWithShaders(
       widget: ListView.separated(

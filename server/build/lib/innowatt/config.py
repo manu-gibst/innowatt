@@ -77,7 +77,7 @@ class Chat():
             context=retrieve_context(query),
         )
         
-        return Mistral().generate_response(prompt, model_is_pro=False)
+        return Mistral().generate_response(prompt, compression=False)
     
     def get_response(self, query:str) -> str:
         """Generate a response in sync"""

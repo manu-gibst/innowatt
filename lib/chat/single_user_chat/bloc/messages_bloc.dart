@@ -96,7 +96,6 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
       await _chatRepository.updateCreatedTime(
         chatId: _messageRepository.chatId,
       );
-      print("User's message sent to server");
 
       // Adding a blank Message to append chunks from the stream
       emit(state.copyWith(
@@ -108,7 +107,6 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
           text: '',
         ),
       ));
-      print('generatingMessage created');
       final stream = _aiRepository.streamResponse(
         userToken: userToken!,
         chatId: _messageRepository.chatId,
@@ -124,7 +122,6 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
           return state.copyWith(generatingMessage: generatingMessage);
         },
       );
-      print("generatingMessage completed = ${state.generatingMessage!.text}");
 
       await _messageRepository.sendMessage(
         id: state.generatingMessage!.id,
@@ -136,7 +133,6 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
       await _chatRepository.updateCreatedTime(
         chatId: _messageRepository.chatId,
       );
-      print("generated Message persisted to server");
     } catch (e) {
       print(e);
       emit(state.copyWith(status: MessagesStatus.failure));

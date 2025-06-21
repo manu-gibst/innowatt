@@ -10,7 +10,7 @@ from typing import Annotated, Optional, List
 
 from innowatt.models import Message
 from innowatt.mistral import Mistral
-from innowatt.prompts import compression_prompt_template
+from innowatt.prompts import compression_prompt_template, main_prompt_template
 from innowatt.knowledge_base import retrieve_context
 from innowatt.firestore import Firestore
 # from innowatt.func_tokens import estimate_tokens
@@ -76,18 +76,25 @@ class Chat():
             last_messages=self.last_messages,
             context=retrieve_context(query),
         )
+        print("First prompt")
+        print(prompt)
         
-        return Mistral().generate_response(prompt, model_is_pro=False)
+        return Mistral().generate_response(prompt, compression=True)
+        
     
     def get_response(self, query:str) -> str:
         """Generate a response in sync"""
         prompt = self._distill_prompt(query)
         result = Mistral().generate_response(prompt)
-        self.firestore.send_message(result)
         return result
     
     async def generate_stream_response(self, query:str):
         """Generate a streaming response in async"""
-        prompt = self._distill_prompt(query)
+        prompt = main_prompt_template.format(
+            query=query,
+            context=self._distill_prompt(query),
+        )
+        print("Second prompt")
+        print(prompt)
         async for chunk in Mistral().generate_stream_response(prompt):
             yield chunk
