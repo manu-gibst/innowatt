@@ -1,5 +1,5 @@
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
+from langchain_mistralai.embeddings import MistralAIEmbeddings
 
 from dotenv import load_dotenv
 import pathlib
@@ -11,7 +11,7 @@ CHROMA_PATH = curr_dir.as_posix() + "/chroma"
 basedir = pathlib.Path(__file__).parents[2]
 load_dotenv(basedir / ".env")
 
-embedding_function = OpenAIEmbeddings()
+embedding_function = MistralAIEmbeddings()
 db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
 
 def retrieve_context(query:str) -> str:

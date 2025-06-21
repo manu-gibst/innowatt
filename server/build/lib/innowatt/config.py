@@ -2,17 +2,18 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin.auth import verify_id_token
 
+import asyncio
 from functools import lru_cache
 import os
 from pydantic_settings import BaseSettings
 from typing import Annotated, Optional, List
 
 from innowatt.models import Message
-from innowatt.gemini import Gemini
+from innowatt.mistral import Mistral
 from innowatt.prompts import compression_prompt_template
 from innowatt.knowledge_base import retrieve_context
 from innowatt.firestore import Firestore
-from innowatt.func_tokens import estimate_tokens
+# from innowatt.func_tokens import estimate_tokens
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -76,13 +77,26 @@ class Chat():
             context=retrieve_context(query),
         )
         
-        return Gemini().generate_response(prompt, model_is_pro=False)
+        return Mistral().generate_response(prompt, model_is_pro=False)
     
     def get_response(self, query:str) -> str:
+        """Generate a response in sync"""
         prompt = self._distill_prompt(query)
-        return Gemini().generate_response(prompt)
+        result = Mistral().generate_response(prompt)
+        self.firestore.send_message(result)
+        return result
     
     async def generate_stream_response(self, query:str) -> str:
+        """Generate a streaming response in async"""
         prompt = self._distill_prompt(query)
-        return Gemini().generate_stream_response(prompt)
+        stream = Mistral().generate_stream_response(prompt)
+        async for chunk in stream():
+            print(chunk, end='', flush=True)
+
     
+
+async def test():
+    Mistral().generate_stream_response(prompt='Hello! What is the weather?')
+
+if __name__ == '__main__':
+    asyncio.run(test())

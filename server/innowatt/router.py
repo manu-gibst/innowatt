@@ -33,11 +33,24 @@ def get_response(chatid: str, query:str, last_messages: List[Message], user: Ann
         "response": response
         }
 
+
 @router.post("/{chatid}/stream-response")
 async def get_response(chatid: str, query:str, last_messages: List[Message], user: Annotated[dict, Depends(get_firebase_user_from_token)]):
     """Generates stream AI response based on [last_messages] and [summary]"""
+    
     chat = Chat(chat_id=chatid, last_messages=last_messages)
+
+    # return StreamingResponse(
+    #     fake_stream(),
+    #     media_type='text/plain',
+    # )
+
     return StreamingResponse(
-        await chat.generate_stream_response(query), 
+        chat.generate_stream_response(query), 
         media_type='text/plain',
     )
+
+async def fake_stream():
+    for i in range(5):
+        time.sleep(1)
+        yield f"chunk {i}\n".encode("utf-8")

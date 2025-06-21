@@ -166,6 +166,7 @@ class _MessagesBuilder extends StatelessWidget {
             }
             return ChatListBuilder(
               messages: messages!,
+              pinnedMessage: state.generatingMessage,
               currentUserId:
                   context.read<AuthenticationRepository>().currentUser.id,
               scrollController: _scrollController,

@@ -8,35 +8,60 @@ class ChatListBuilder extends StatelessWidget {
     required this.messages,
     required this.currentUserId,
     this.scrollController,
+    this.pinnedMessage,
   });
 
   final List<Message> messages;
   final String currentUserId;
   final ScrollController? scrollController;
 
+  /// A pinned message to the bottom.
+  /// Useful for displaying streaming AI response.
+  final Message? pinnedMessage;
+
   @override
   Widget build(BuildContext context) {
+    print("messages.length = ${messages.length}");
+    print("pinnedMessage = $pinnedMessage");
+    final shift = pinnedMessage != null ? 1 : 0;
     return _WidgetWithShaders(
       widget: ListView.separated(
         controller: scrollController,
         reverse: true,
-        itemCount: messages.length,
+        itemCount: messages.length + shift,
         itemBuilder: (context, index) {
+          if (shift > 0 && index < shift) {
+            return MessageBubble(
+              key: Key('__${pinnedMessage!.id}_pinnedMessageBubbleKey__'),
+              message: pinnedMessage!.changeText(pinnedMessage!.text),
+              prevDifferent: pinnedMessage!.isDifferent(messages.first),
+              nextDifferent: true,
+              messageAlignment: pinnedMessage!.authorId == currentUserId
+                  ? MessageAlignment.right
+                  : MessageAlignment.left,
+            );
+          }
+          final shiftedIndex = index - shift;
           return MessageBubble(
-            key: Key('__${messages[index].id!}_messageBubbleKey__'),
-            message: messages[index],
-            prevDifferent: messages[index].isDifferent(
-                index < messages.length - 1 ? messages[index + 1] : null),
-            nextDifferent: messages[index]
-                .isDifferent(index > 0 ? messages[index - 1] : null),
-            messageAlignment: messages[index].authorId == currentUserId
+            key: Key('__${messages[shiftedIndex].id}_messageBubbleKey__'),
+            message: messages[shiftedIndex],
+            prevDifferent: messages[shiftedIndex].isDifferent(
+              shiftedIndex < messages.length - 1
+                  ? messages[shiftedIndex + 1]
+                  : null,
+            ),
+            nextDifferent: messages[shiftedIndex].isDifferent(
+              shiftedIndex > 0 ? messages[shiftedIndex - 1] : null,
+            ),
+            messageAlignment: messages[shiftedIndex].authorId == currentUserId
                 ? MessageAlignment.right
                 : MessageAlignment.left,
           );
         },
         separatorBuilder: (context, index) {
-          if (messages[index].isDifferentDay(messages[index + 1])) {
-            final date = messages[index + 1].createdAt.toDate();
+          final shiftedIndex = index - shift;
+          if (messages[index].isDifferentDay(messages[shiftedIndex + 1])) {
+            final date = messages[shiftedIndex + 1].createdAt.toDate();
             return Center(
               child: Container(
                 margin: EdgeInsets.all(4),

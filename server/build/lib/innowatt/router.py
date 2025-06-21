@@ -23,20 +23,21 @@ async def get_userid(user: Annotated[dict, Depends(get_firebase_user_from_token)
 def test(message: Message):
     return {"details": message}
 
-@router.post("/{chatid}/generate-response")
-async def get_response(chatid: str, last_messages: List[Message], summary: str, user: Annotated[dict, Depends(get_firebase_user_from_token)]):
-    """generates AI response based on [last_messages] and [summary]"""
+@router.post("/{chatid}/get-response")
+def get_response(chatid: str, query:str, last_messages: List[Message], user: Annotated[dict, Depends(get_firebase_user_from_token)]):
+    """Generates AI response based on [last_messages] and [summary]"""
+    chat = Chat(chat_id=chatid, last_messages=last_messages)
+    response = chat.get_response(query)
+    return {
+        "message": "success",
+        "response": response
+        }
+
+@router.post("/{chatid}/stream-response")
+async def get_response(chatid: str, query:str, last_messages: List[Message], user: Annotated[dict, Depends(get_firebase_user_from_token)]):
+    """Generates stream AI response based on [last_messages] and [summary]"""
     chat = Chat(chat_id=chatid, last_messages=last_messages)
     return StreamingResponse(
-        chat.generate_stream_response(),
-        media_type="text/plain",
+        await chat.generate_stream_response(query), 
+        media_type='text/plain',
     )
-
-def test():
-    for i in range(5):
-        yield f"Chunk {i+1}\n"
-        time.sleep(1)
-
-@router.post("/test_stream")
-async def test_stream():
-    return StreamingResponse(test(), media_type="text/plain")

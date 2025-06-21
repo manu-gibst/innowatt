@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 // Exception thrown when server request fails
@@ -10,6 +8,9 @@ class ServerRequestFailure implements Exception {}
 
 // Exception thrown during authentication failure
 class AuthenticationFailure implements Exception {}
+
+// Exception thrown during response generation request
+class ResponseGenerationFailure implements Exception {}
 
 /// {@template ai_repository}
 /// Repository which manages connection to backend AI. \\
@@ -49,22 +50,20 @@ class AiRepository {
     return userId;
   }
 
-  Future<String> generateResponse({
+  Future<void> requestResponse({
     required String userToken,
     required String chatId,
+    required String query,
     required List<Map<String, dynamic>> lastMessages,
-    required String summary,
   }) async {
+    final queryParameters = {"query": query};
     final body = lastMessages;
-    final queryParameters = {"summary": summary};
 
     final request = Uri.http(
       _baseUrl,
-      '/$chatId/generate-response',
+      '/$chatId/get-response',
       queryParameters,
     );
-
-    print("jsonEncode(body) = ${jsonEncode(body)}");
 
     final response = await _httpClient.post(
       request,
@@ -75,28 +74,23 @@ class AiRepository {
       },
     );
 
-    print("${response.statusCode}: ${response.body}");
-
     if (response.statusCode != 200) throw ServerRequestFailure();
 
     final json = jsonDecode(response.body) as Map<String, dynamic>;
 
-    if (!json.containsKey('details')) throw AuthenticationFailure();
+    if (!json.containsKey('message')) throw ResponseGenerationFailure();
 
-    final userId = json['details'] as String;
-
-    return userId;
+    if (json['message'] != 'success') throw ResponseGenerationFailure();
   }
 
-  // TODO: Use this function in the BLoC and test it.
-  Stream<String> getStreamResponse({
+  Stream<String> streamResponse({
     required String userToken,
     required String chatId,
+    required String query,
     required List<Map<String, dynamic>> lastMessages,
-    required String summary,
   }) async* {
-    final body = {"last_messages": lastMessages};
-    final queryParameters = {"summary": summary};
+    final queryParameters = {"query": query};
+    final body = lastMessages;
 
     final uri = Uri.http(_baseUrl, '/$chatId/stream-response', queryParameters);
 
@@ -104,16 +98,12 @@ class AiRepository {
         http.Request('POST', uri)
           ..bodyBytes = utf8.encode(jsonEncode(body))
           ..headers['Authorization'] = 'Bearer $userToken'
-          ..headers['content-type'] = 'application/json';
+          ..headers['Content-Type'] = 'application/json';
 
     final response = await _httpClient.send(request);
 
     if (response.statusCode != 200) throw ServerRequestFailure();
 
-    try {
-      yield* response.stream.transform(utf8.decoder).transform(LineSplitter());
-    } catch (e) {
-      throw Exception("Error in stream: $e");
-    }
+    yield* response.stream.transform(utf8.decoder).transform(LineSplitter());
   }
 }

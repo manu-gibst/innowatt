@@ -1,14 +1,16 @@
-import 'dart:convert';
+import 'dart:math';
 
 import 'package:ai_repository/ai_repository.dart';
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:innowatt/repository/chat_repository/chat_repository.dart';
 import 'package:innowatt/repository/message_repository/message_repository.dart';
 import 'package:innowatt/repository/message_repository/src/models/message.dart';
 import 'package:stream_transform/stream_transform.dart';
+import 'package:uuid/uuid.dart';
 
 part 'messages_event.dart';
 part 'messages_state.dart';
@@ -33,10 +35,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
         _authenticationRepository = authenticationRepository,
         super(MessagesState()) {
     on<MessagesFetched>(
-      (event, emit) async {
-        print("MessagesFetched() called");
-        await _onFetched(event, emit);
-      },
+      _onFetched,
       transformer: throttleDroppable(throttleDuration),
     );
     on<MessageSent>(_onSent);
@@ -55,9 +54,18 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     try {
       return emit.forEach(_messageRepository.getMessageStream(),
           onData: (data) {
+        bool foundDuplicate = false;
+        if (state.generatingMessage != null) {
+          for (int i = 0; i < data.length; i++) {
+            if (data[i].id == state.generatingMessage!.id) {
+              foundDuplicate = true;
+            }
+          }
+        }
         return state.copyWith(
           status: MessagesStatus.success,
           messages: data,
+          generatingMessage: foundDuplicate ? null : state.generatingMessage,
         );
       });
     } catch (e) {
@@ -78,22 +86,61 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     Emitter<MessagesState> emit,
   ) async {
     final userToken = await _authenticationRepository.getIdToken();
-    final result = await _aiRepository.generateResponse(
-      userToken: userToken!,
-      chatId: _messageRepository.chatId,
-      lastMessages:
-          state.messages!.map((e) => e.toJson()).toList().sublist(0, 2),
-      summary: 'empty',
-    );
-    print(result);
-    return;
+    try {
+      // Persisting User's message
+      await _messageRepository.sendMessage(
+        text: event.text,
+        authorId: event.authorId,
+        chatId: _messageRepository.chatId,
+      );
+      await _chatRepository.updateCreatedTime(
+        chatId: _messageRepository.chatId,
+      );
+      print("User's message sent to server");
 
-    _messageRepository.sendMessage(
-      text: event.text,
-      authorId: event.authorId,
-      chatId: _messageRepository.chatId,
-    );
-    _chatRepository.updateCreatedTime(chatId: _messageRepository.chatId);
+      // Adding a blank Message to append chunks from the stream
+      emit(state.copyWith(
+        waitingReponse: true,
+        generatingMessage: Message(
+          id: Uuid().v1(),
+          authorId: 'bot_id',
+          createdAt: Timestamp.now(),
+          text: '',
+        ),
+      ));
+      print('generatingMessage created');
+      final stream = _aiRepository.streamResponse(
+        userToken: userToken!,
+        chatId: _messageRepository.chatId,
+        query: event.text,
+        lastMessages: state.messages!.basicJsonList(),
+      );
+      await emit.forEach(
+        stream,
+        onData: (chunk) {
+          final generatingMessage = state.generatingMessage!.changeText(
+            '${state.generatingMessage!.text}$chunk\n',
+          );
+          return state.copyWith(generatingMessage: generatingMessage);
+        },
+      );
+      print("generatingMessage completed = ${state.generatingMessage!.text}");
+
+      await _messageRepository.sendMessage(
+        id: state.generatingMessage!.id,
+        text: state.generatingMessage!.text,
+        authorId: 'bot_id',
+        chatId: _messageRepository.chatId,
+      );
+      emit(state.copyWith(waitingReponse: false, generatingMessage: null));
+      await _chatRepository.updateCreatedTime(
+        chatId: _messageRepository.chatId,
+      );
+      print("generated Message persisted to server");
+    } catch (e) {
+      print(e);
+      emit(state.copyWith(status: MessagesStatus.failure));
+    }
   }
 
   @override
@@ -101,5 +148,11 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     await _messageRepository.dispose();
     await _chatRepository.dispose();
     return super.close();
+  }
+}
+
+extension on List<Message> {
+  List<Map<String, dynamic>> basicJsonList() {
+    return map((e) => e.toBasicJson()).toList().sublist(1, min(10, length));
   }
 }

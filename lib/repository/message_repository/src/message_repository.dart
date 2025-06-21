@@ -42,18 +42,19 @@ class MessageRepository {
 
   final FirestoreCollection _dynamicCollection;
 
-  void sendMessage({
+  Future<void> sendMessage({
     required String text,
     required String authorId,
     required String chatId,
-  }) {
+    String? id,
+  }) async {
     final message = Message(
       authorId: authorId,
       createdAt: Timestamp.now(),
       text: text,
     );
     try {
-      _messages.doc().set(message);
+      await _messages.doc(id).set(message);
     } on FirebaseException catch (e) {
       throw FirestoreDatabaseFailure.fromCode(e.code);
     } catch (_) {

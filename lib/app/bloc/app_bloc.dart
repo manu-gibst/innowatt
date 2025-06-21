@@ -34,7 +34,6 @@ class AppBloc extends Bloc<AppEvent, AppState> with ChangeNotifier {
     AppLogoutPressed event,
     Emitter<AppState> emit,
   ) async {
-    print("_onLogoutPressed");
     try {
       await _authenticationRepository.logOut();
     } catch (e) {

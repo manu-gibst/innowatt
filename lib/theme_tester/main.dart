@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 
 import 'constants.dart';
-import 'theme_tester.dart';
 
 void main() async {
   runApp(const App());

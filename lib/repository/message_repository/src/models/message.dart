@@ -11,10 +11,7 @@ Timestamp? _firestoreTimestampFromJson(dynamic value) {
 }
 
 /// This method only stores the "timestamp" data type back in the Firestore
-dynamic _firestoreTimestampToJson(dynamic value) {
-  if (value is Timestamp) return value.microsecondsSinceEpoch;
-  throw FormatException('Invalid timestamp format: $value');
-}
+dynamic _firestoreTimestampToJson(dynamic value) => value;
 
 @JsonSerializable()
 class Message {
@@ -40,6 +37,14 @@ class Message {
 
   Map<String, dynamic> toJson() {
     return _$MessageToJson(this);
+  }
+
+  // Includes only text and authorId keys
+  Map<String, dynamic> toBasicJson() {
+    return {
+      'text': toJson()['text'],
+      'author_id': toJson()['author_id'],
+    };
   }
 
   factory Message.fromFirestore(
@@ -69,6 +74,13 @@ class Message {
     return false;
   }
 
+  Message changeText(String newText) => Message(
+        authorId: authorId,
+        createdAt: createdAt,
+        text: newText,
+        id: id,
+      );
+
   int differenceInHours(Message other) {
     try {
       final difference =
@@ -97,6 +109,6 @@ class Message {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Message && other.id == id;
+    return other is Message && other.id == id && other.text == text;
   }
 }

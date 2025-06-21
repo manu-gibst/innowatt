@@ -100,8 +100,10 @@ class ChatRepository {
     return querySnapshot.docs.isEmpty;
   }
 
-  void updateCreatedTime({required String chatId}) {
-    _chatsCollection.doc(chatId).update({'updated_time': Timestamp.now()});
+  Future<void> updateCreatedTime({required String chatId}) async {
+    await _chatsCollection
+        .doc(chatId)
+        .update({'updated_time': Timestamp.now()});
   }
 
   Future<void> dispose() async {}

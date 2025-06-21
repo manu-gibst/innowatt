@@ -3,9 +3,6 @@ You are a chat-bot named Manu. You are serving the users in the app called Innow
 Your job is to help users with providing necessary information and being their guide. 
 
 You are given: a diary of the user, a summary of the previous messages (if available), last messages, and the query. 
-
-Call [get_chat_history, get_rag_context] functions when you doesn't have enough information to answer it.
-If the user asks factual information
 """
 
 compression_prompt_template = """

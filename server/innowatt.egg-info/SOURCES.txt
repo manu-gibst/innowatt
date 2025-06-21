@@ -5,6 +5,7 @@ innowatt/constants.py
 innowatt/func_tokens.py
 innowatt/gemini.py
 innowatt/main.py
+innowatt/mistral.py
 innowatt/prompts.py
 innowatt/router.py
 innowatt.egg-info/PKG-INFO
