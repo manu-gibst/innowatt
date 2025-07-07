@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innowatt/app/bloc/app_bloc.dart';
+import 'package:innowatt/app/router/page_transitions.dart';
 import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/app/view/app.dart';
 import 'package:innowatt/auth/login/view/login_page.dart';
 import 'package:innowatt/auth/sign_up/view/sign_up_page.dart';
 import 'package:innowatt/chat/chat_list/view/all_chats_screen.dart';
 import 'package:innowatt/chat/single_user_chat/view/single_user_chat_screen.dart';
+import 'package:innowatt/projects/view/projects_screen.dart';
 part 'scaffold_with_navbar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
@@ -21,12 +23,16 @@ GoRouter router(AppBloc bloc) {
     initialLocation: Routes.login,
     routes: <RouteBase>[
       GoRoute(
-        builder: (context, state) => const LoginPage(),
         path: Routes.login,
+        builder: (context, state) => const LoginPage(),
       ),
       GoRoute(
-        builder: (context, state) => const SignUpPage(),
         path: Routes.signUp,
+        builder: (context, state) => const SignUpPage(),
+      ),
+      GoRoute(
+        path: Routes.projectRoutes.allProjects,
+        builder: (context, state) => const ProjectsScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -69,7 +75,7 @@ GoRouter router(AppBloc bloc) {
         return !onSignUpPage ? Routes.login : null;
       }
       if (onLoginPage) {
-        return Routes.home;
+        return Routes.projectRoutes.allProjects;
       }
       return null;
     },

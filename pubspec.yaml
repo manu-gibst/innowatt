@@ -50,6 +50,9 @@ dependencies:
   flutter_dotenv: ^5.2.1
   firebase_app_check: ^0.3.2+7
   uuid: ^4.5.1
+  vector_math: ^2.1.4
+  flutter_custom_carousel: ^0.1.0+1
+  flutter_animate: ^4.5.2
 
 dev_dependencies:
   flutter_test:
