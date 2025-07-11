@@ -4,10 +4,14 @@ import 'package:authentication_repository/authentication_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_custom_carousel/flutter_custom_carousel.dart';
+import 'package:gap/gap.dart';
+import 'package:innowatt/core/widgets/elevated_button.dart';
+import 'package:innowatt/core/widgets/information_card.dart';
 import 'package:innowatt/core/widgets/glowing_backlight.dart';
 import 'package:innowatt/core/widgets/light_bulb.dart';
 import 'package:innowatt/core/widgets/rounded_triangle_painter.dart';
 import 'package:innowatt/projects/bloc/project_bloc.dart';
+import 'package:projects_repository/projects_repository.dart';
 
 const padding = 40.0;
 
@@ -16,10 +20,13 @@ class ProjectsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final uid = context.read<AuthenticationRepository>().currentUser.id;
     return BlocProvider(
+      lazy: false,
       create: (context) => ProjectBloc(
-        userId: context.read<AuthenticationRepository>().currentUser.id,
-      ),
+        projectsRepository: ProjectsRepository(uid: uid),
+        userId: uid,
+      )..add(ProjectsFetched()),
       child: _ProjectsScreenWrapper(),
     );
   }
@@ -88,6 +95,7 @@ class ProjectsCollection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     final width = min(
       MediaQuery.of(context).size.height / 2,
@@ -116,51 +124,86 @@ class ProjectsCollection extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: CustomCarousel(
-                    itemCountAfter: 1,
-                    itemCountBefore: 1,
-                    alignment: Alignment.center,
-                    depthOrder: DepthOrder.selectedInFront,
-                    scrollDirection: Axis.horizontal,
-                    scrollSpeed: 0.4,
-                    physics: PageScrollPhysics(),
-                    onSelectedItemChanged: (i) {
-                      // TODO: Make BlOC component trigger or smt
-                    },
-                    effectsBuilder: (_, ratio, child) {
-                      double o = (ratio * -1 + 0.5) * pi;
-                      double r = width * 0.4, x = r * cos(o);
-                      double scale = (sin(o) + 2) / 3;
-                      // double blur = 16 * (1 - scale);
+                  child: BlocBuilder<ProjectBloc, ProjectState>(
+                    builder: (context, state) {
+                      switch (state.status) {
+                        case ProjectStatus.initial:
+                        case ProjectStatus.waiting:
+                          return InformationCard(
+                            type: StatusType.loading,
+                            title: "Loading Projects...",
+                          );
+                        case ProjectStatus.failure:
+                          return InformationCard(type: StatusType.error);
+                        case ProjectStatus.success:
+                          if (state.projects == null ||
+                              state.projects!.isEmpty) {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                InformationCard(
+                                  type: StatusType.neutral,
+                                  title:
+                                      "Looks like you don't have any projects yet",
+                                  bottomButton: InformationButton(
+                                    text: "Create new project",
+                                    icon: null,
+                                    onPressed: () {},
+                                  ),
+                                ),
+                              ],
+                            );
+                          }
+                          return CustomCarousel(
+                            itemCountAfter: 1,
+                            itemCountBefore: 1,
+                            alignment: Alignment.center,
+                            depthOrder: DepthOrder.selectedInFront,
+                            scrollDirection: Axis.horizontal,
+                            scrollSpeed: 0.4,
+                            physics: PageScrollPhysics(),
+                            onSelectedItemChanged: (i) {
+                              context.read<ProjectBloc>().add(
+                                ProjectSelected(project: state.projects![i]),
+                              );
+                            },
+                            effectsBuilder: (_, ratio, child) {
+                              double o = (ratio * -1 + 0.5) * pi;
+                              double r = width * 0.4, x = r * cos(o);
+                              double scale = (sin(o) + 2) / 3;
+                              // double blur = 16 * (1 - scale);
 
-                      return Transform(
-                        transform: Matrix4.identity()
-                          ..translate(x)
-                          ..scale(scale),
-                        alignment: Alignment.center,
-                        child: Opacity(
-                          opacity: pow(scale, 3).toDouble(),
-                          child: child,
-                        ),
-                      );
+                              return Transform(
+                                transform: Matrix4.identity()
+                                  ..translate(x)
+                                  ..scale(scale),
+                                alignment: Alignment.center,
+                                child: Opacity(
+                                  opacity: pow(scale, 3).toDouble(),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            children: [
+                              ProjectContainer(
+                                projectName: "Project Name",
+                                completion: 0.8,
+                                active: true,
+                              ),
+                              ProjectContainer(
+                                projectName: "Another Name",
+                                completion: 0.5,
+                                active: true,
+                              ),
+                              ProjectContainer(
+                                projectName: "Third Name",
+                                completion: 0.0,
+                                active: true,
+                              ),
+                            ],
+                          );
+                      }
                     },
-                    children: [
-                      ProjectContainer(
-                        projectName: "Project Name",
-                        completion: 0.8,
-                        active: true,
-                      ),
-                      ProjectContainer(
-                        projectName: "Another Name",
-                        completion: 0.5,
-                        active: true,
-                      ),
-                      ProjectContainer(
-                        projectName: "Third Name",
-                        completion: 0.0,
-                        active: true,
-                      ),
-                    ],
                   ),
                 ),
                 const SizedBox(height: 80),
@@ -200,9 +243,7 @@ class ProjectContainer extends StatelessWidget {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(
-            width / 2 - padding,
-          ),
+          borderRadius: BorderRadius.circular(width / 2 - padding),
           gradient: LinearGradient(
             colors: [
               active ? colorScheme.primaryFixed : colorScheme.surfaceBright,
@@ -266,9 +307,7 @@ class ProjectContainer extends StatelessWidget {
                           color: colorScheme.secondary,
                           spreadRadius: 1,
                         ),
-                        BoxShadow(
-                          color: colorScheme.surface,
-                        ),
+                        BoxShadow(color: colorScheme.surface),
                         BoxShadow(
                           offset: Offset(0, 6),
                           blurRadius: 4,
@@ -303,10 +342,7 @@ class ProjectContainer extends StatelessWidget {
 }
 
 class BlackSpotWithLamp extends StatelessWidget {
-  const BlackSpotWithLamp({
-    super.key,
-    required this.brightness,
-  });
+  const BlackSpotWithLamp({super.key, required this.brightness});
 
   final double brightness;
 
@@ -333,10 +369,7 @@ class BlackSpotWithLamp extends StatelessWidget {
               borderRadius: BorderRadius.circular((width - padding * 4) / 2),
             ),
           ),
-          LightBulb(
-            size: (width - padding * 4) / 2,
-            brightness: brightness,
-          ),
+          LightBulb(size: (width - padding * 4) / 2, brightness: brightness),
         ],
       ),
     );

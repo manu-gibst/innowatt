@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:innowatt/chat/single_user_chat/bloc/messages_bloc.dart';
 import 'package:innowatt/chat/single_user_chat/view/chat_list_builder.dart';
-import 'package:innowatt/core/widgets/error_card.dart';
+import 'package:innowatt/core/widgets/information_card.dart';
 import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
 import 'package:innowatt/repository/message_repository/message_repository.dart';
 
@@ -156,9 +156,9 @@ class _MessagesBuilder extends StatelessWidget {
         switch (state.status) {
           case MessagesStatus.initial:
           case MessagesStatus.loading:
-            return Center(child: CircularProgressIndicator());
+            return InformationCard(type: StatusType.loading);
           case MessagesStatus.failure:
-            return ErrorCard();
+            return InformationCard(type: StatusType.error);
           case MessagesStatus.success:
             final messages = state.messages;
             if (messages != null && messages.isEmpty) {

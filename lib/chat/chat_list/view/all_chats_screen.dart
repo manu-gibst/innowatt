@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:innowatt/chat/chat_form/view/single_user_form.dart';
 import 'package:innowatt/chat/chat_list/bloc/chat_list_bloc.dart';
 import 'package:innowatt/chat/chat_list/view/chat_list_item.dart';
-import 'package:innowatt/core/widgets/error_card.dart';
+import 'package:innowatt/core/widgets/information_card.dart';
 import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
 
 class AllChatsScreen extends StatelessWidget {
@@ -60,7 +60,9 @@ class _AllChatsViewState extends State<AllChatsView> {
             case ChatListStatus.loading:
               return Center(child: CircularProgressIndicator());
             case ChatListStatus.failure:
-              return ErrorCard();
+              return InformationCard(
+                type: StatusType.error,
+              );
             case ChatListStatus.success:
               final chats = state.chats;
               if (chats.isEmpty) {

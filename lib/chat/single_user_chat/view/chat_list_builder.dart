@@ -59,7 +59,7 @@ class ChatListBuilder extends StatelessWidget {
         separatorBuilder: (context, index) {
           final shiftedIndex = index - shift;
           if (messages[index].isDifferentDay(messages[shiftedIndex + 1])) {
-            final date = messages[shiftedIndex + 1].createdAt.toDate();
+            final date = messages[shiftedIndex + 1].createdAt!.toDate();
             return Center(
               child: Container(
                 margin: EdgeInsets.all(4),

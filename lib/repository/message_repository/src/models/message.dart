@@ -28,7 +28,7 @@ class Message {
     toJson: _firestoreTimestampToJson,
     fromJson: _firestoreTimestampFromJson,
   )
-  final Timestamp createdAt;
+  final Timestamp? createdAt;
   final String text;
 
   factory Message.fromJson(Map<String, dynamic> json) {
@@ -84,7 +84,7 @@ class Message {
   int differenceInHours(Message other) {
     try {
       final difference =
-          (createdAt.toDate()).difference(other.createdAt.toDate());
+          (createdAt!.toDate()).difference(other.createdAt!.toDate());
       return difference.inHours.abs();
     } catch (_) {
       return 0;
@@ -93,8 +93,8 @@ class Message {
 
   bool isDifferentDay(Message other) {
     try {
-      return createdAt.toDate().toString().substring(0, 10) !=
-          other.createdAt.toDate().toString().substring(0, 10);
+      return createdAt!.toDate().toString().substring(0, 10) !=
+          other.createdAt!.toDate().toString().substring(0, 10);
     } catch (_) {
       return false;
     }

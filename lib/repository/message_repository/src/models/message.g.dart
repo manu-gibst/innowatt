@@ -11,10 +11,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => $checkedCreate(
       json,
       ($checkedConvert) {
         final val = Message(
-          id: $checkedConvert('id', (v) => v as String),
+          id: $checkedConvert('id', (v) => v as String?),
           authorId: $checkedConvert('author_id', (v) => v as String),
           createdAt: $checkedConvert(
-              'created_at', (v) => _firestoreTimestampFromJson(v)!),
+              'created_at', (v) => _firestoreTimestampFromJson(v)),
           text: $checkedConvert('text', (v) => v as String),
         );
         return val;

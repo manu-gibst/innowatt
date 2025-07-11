@@ -1,23 +1,29 @@
 part of 'project_bloc.dart';
 
+enum ProjectStatus { initial, waiting, success, failure }
+
 final class ProjectState extends Equatable {
   const ProjectState({
-    required this.index,
+    required this.selectedProject,
     required this.projects,
+    required this.status,
   });
-  final int index;
+  final Project? selectedProject;
   final List<Project>? projects;
+  final ProjectStatus status;
 
   ProjectState copyWith({
-    int? index,
+    Project? selectedProject,
     List<Project>? projects,
+    ProjectStatus? status,
   }) {
     return ProjectState(
-      index: index ?? this.index,
+      selectedProject: selectedProject ?? this.selectedProject,
       projects: projects ?? this.projects,
+      status: status ?? this.status,
     );
   }
 
   @override
-  List<Object?> get props => [index, projects];
+  List<Object?> get props => [selectedProject, projects];
 }

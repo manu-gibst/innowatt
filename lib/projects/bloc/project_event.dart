@@ -8,8 +8,23 @@ sealed class ProjectEvent extends Equatable {
 }
 
 final class ProjectSelected extends ProjectEvent {
-  const ProjectSelected({required this.index});
-  final int index;
+  const ProjectSelected({required this.project});
+  final Project project;
 }
 
 final class ProjectsFetched extends ProjectEvent {}
+
+final class ProjectCreated extends ProjectEvent {
+  const ProjectCreated({required this.projectName});
+  final String projectName;
+}
+
+final class ProjectRenamed extends ProjectEvent {
+  const ProjectRenamed({required this.name});
+  final String name;
+}
+
+final class ProjectProgressed extends ProjectEvent {
+  const ProjectProgressed({required this.newProgress});
+  final int newProgress;
+}

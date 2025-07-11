@@ -82,7 +82,7 @@ class _Bubble extends StatelessWidget {
                     style: DefaultTextStyle.of(context).style,
                     children: [
                       TextSpan(
-                        text: ' ${message.createdAt.time()}',
+                        text: ' ${message.createdAt!.time()}',
                         style: TextStyle(
                           color: Colors.transparent,
                           fontSize: 7,
@@ -96,7 +96,7 @@ class _Bubble extends StatelessWidget {
                   bottom: -4,
                   right: 0,
                   child: Text(
-                    message.createdAt.time(),
+                    message.createdAt!.time(),
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                           color: Theme.of(context).colorScheme.tertiary,
                         ),
