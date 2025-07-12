@@ -13,7 +13,7 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
   })  : _projectsRepository = projectsRepository,
         super(ProjectState(
           projects: null,
-          selectedProject: null,
+          selectedIndex: null,
           status: ProjectStatus.initial,
         )) {
     on<ProjectSelected>(_onSelected);
@@ -37,7 +37,7 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
           return state.copyWith(
             status: ProjectStatus.success,
             projects: data,
-            selectedProject: data.isNotEmpty ? data[0] : null,
+            selectedIndex: 0,
           );
         },
       );
@@ -63,7 +63,7 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
     ProjectSelected event,
     Emitter<ProjectState> emit,
   ) {
-    emit(state.copyWith(selectedProject: event.project));
+    emit(state.copyWith(selectedIndex: event.index));
   }
 
   Future<void> _onRenamed(

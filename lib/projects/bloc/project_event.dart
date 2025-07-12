@@ -8,8 +8,8 @@ sealed class ProjectEvent extends Equatable {
 }
 
 final class ProjectSelected extends ProjectEvent {
-  const ProjectSelected({required this.project});
-  final Project project;
+  const ProjectSelected({required this.index});
+  final int? index;
 }
 
 final class ProjectsFetched extends ProjectEvent {}

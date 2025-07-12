@@ -7,8 +7,10 @@ import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innowatt/core/widgets/elevated_button.dart';
 import 'package:innowatt/core/widgets/information_card.dart';
-import 'package:innowatt/projects/cubit/create_project_cubit.dart';
+import 'package:innowatt/projects/create_project/cubit/create_project_cubit.dart';
 import 'package:projects_repository/projects_repository.dart';
+
+const outerBorderRadius = 40.0;
 
 class CreateProjectWidget extends StatelessWidget {
   const CreateProjectWidget({super.key});
@@ -29,7 +31,7 @@ class CreateProjectWidget extends StatelessWidget {
                 barrierDismissible: false,
                 context: context,
                 builder: (context) {
-                  return _CreateProjectDialog();
+                  return CreateProjectDialog();
                 },
               );
             },
@@ -40,8 +42,8 @@ class CreateProjectWidget extends StatelessWidget {
   }
 }
 
-class _CreateProjectDialog extends StatelessWidget {
-  const _CreateProjectDialog();
+class CreateProjectDialog extends StatelessWidget {
+  const CreateProjectDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +80,9 @@ class _CreateProjectDialogWrapper extends StatelessWidget {
             builder: (context) => BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
               child: AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(outerBorderRadius),
+                ),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -98,14 +103,18 @@ class _CreateProjectDialogWrapper extends StatelessWidget {
       },
       builder: (context, state) {
         return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: AbsorbPointer(
             absorbing: state.status.isInProgressOrSuccess,
             child: AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(outerBorderRadius),
+              ),
               title: const Text("Create project"),
               content: _ProjectNameInput(),
               actions: [
-                TextButton(
+                BlurredElevatedButton(
+                  colorType: ColorType.surface,
                   onPressed: context.pop,
                   child: const Text(
                     "Close",

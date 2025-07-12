@@ -4,30 +4,42 @@ enum ProjectStatus { initial, waiting, success, failure }
 
 final class ProjectState extends Equatable {
   const ProjectState({
-    required this.selectedProject,
+    required this.selectedIndex,
     required this.projects,
     required this.status,
   });
-  final Project? selectedProject;
+  final int? selectedIndex;
   final List<Project>? projects;
   final ProjectStatus status;
 
+  Project? get selectedProject {
+    if (selectedIndex == null || projects == null) return null;
+    return projects![selectedIndex!];
+  }
+
   ProjectState copyWith({
-    Project? selectedProject,
+    Object? selectedIndex,
     List<Project>? projects,
     ProjectStatus? status,
   }) {
     return ProjectState(
-      selectedProject: selectedProject ?? this.selectedProject,
+      selectedIndex:
+          selectedIndex == _unset ? this.selectedIndex : selectedIndex as int?,
       projects: projects ?? this.projects,
       status: status ?? this.status,
     );
   }
 
+  static const _unset = Object();
+
   @override
-  List<Object?> get props => [selectedProject, projects];
+  List<Object?> get props => [
+        selectedIndex,
+        projects,
+        status,
+      ];
 
   @override
   String toString() =>
-      'ProjectState (selectedProject: ${selectedProject?.name}, projects.count = ${projects?.length}, status: ${status.name})';
+      'ProjectState (selectedIndex: $selectedIndex, projects.count = ${projects?.length}, status: ${status.name})';
 }
