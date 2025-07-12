@@ -10,29 +10,12 @@ class BlankProjectContainer extends StatelessWidget {
   const BlankProjectContainer({super.key});
   @override
   Widget build(BuildContext context) {
-    print("BlankProjectContainer");
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
     final width = min(
       MediaQuery.of(context).size.height / 2,
       MediaQuery.of(context).size.width,
-    );
-    return ElevatedButton(
-      style: customElevatedButtonStyle(
-        context,
-        colorType: ColorType.secondary,
-      ),
-      onPressed: () {
-        showDialog(
-          barrierDismissible: false,
-          context: context,
-          builder: (context) {
-            return CreateProjectDialog();
-          },
-        );
-      },
-      child: const Text("CREATE"),
     );
 
     return Padding(

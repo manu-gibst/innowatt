@@ -18,12 +18,6 @@ class ProjectContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-        onPressed: () {
-          print("object");
-        },
-        child: Text("data"));
-    print("ProjectContainer");
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
