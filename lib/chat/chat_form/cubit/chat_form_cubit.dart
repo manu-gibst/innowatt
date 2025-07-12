@@ -19,7 +19,7 @@ class ChatFormCubit extends Cubit<ChatFormState> {
   final AuthenticationRepository _authenticationRepository;
 
   void chatNameChanged(String value) {
-    final chatName = ChatName.dirty(value);
+    final chatName = GenericName.dirty(value);
     emit(state.copyWith(
       chatName: chatName,
       isValid: Formz.validate([chatName]),

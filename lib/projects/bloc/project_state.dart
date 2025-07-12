@@ -26,4 +26,8 @@ final class ProjectState extends Equatable {
 
   @override
   List<Object?> get props => [selectedProject, projects];
+
+  @override
+  String toString() =>
+      'ProjectState (selectedProject: ${selectedProject?.name}, projects.count = ${projects?.length}, status: ${status.name})';
 }

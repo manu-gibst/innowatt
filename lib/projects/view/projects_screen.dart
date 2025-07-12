@@ -11,6 +11,7 @@ import 'package:innowatt/core/widgets/glowing_backlight.dart';
 import 'package:innowatt/core/widgets/light_bulb.dart';
 import 'package:innowatt/core/widgets/rounded_triangle_painter.dart';
 import 'package:innowatt/projects/bloc/project_bloc.dart';
+import 'package:innowatt/projects/view/create_project_widget.dart';
 import 'package:projects_repository/projects_repository.dart';
 
 const padding = 40.0;
@@ -58,30 +59,36 @@ class _ProjectsScreenWrapperState extends State<_ProjectsScreenWrapper> {
             alignment: Alignment(3, 1.6),
             child: GlowingBacklight(colorScheme: colorScheme),
           ),
-          CustomScrollView(
-            physics: PageScrollPhysics(),
-            slivers: [
-              SliverToBoxAdapter(child: ProjectsCollection()),
-              SliverAppBar(
-                backgroundColor: colorScheme.primaryContainer,
-                foregroundColor: colorScheme.onPrimaryContainer,
-                centerTitle: true,
-                title: Text(_activeIndex.toString()),
-                pinned: true,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(20),
-                    bottomRight: Radius.circular(20),
-                  ),
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => const Text("data"),
-                  childCount: 50,
-                ),
-              ),
-            ],
+          BlocBuilder<ProjectBloc, ProjectState>(
+            builder: (context, state) {
+              return CustomScrollView(
+                physics: PageScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(child: ProjectsCollection()),
+                  if (state.selectedProject != null) ...[
+                    SliverAppBar(
+                      backgroundColor: colorScheme.primaryContainer,
+                      foregroundColor: colorScheme.onPrimaryContainer,
+                      centerTitle: true,
+                      title: Text(_activeIndex.toString()),
+                      pinned: true,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(20),
+                          bottomRight: Radius.circular(20),
+                        ),
+                      ),
+                    ),
+                    SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) => const Text("data"),
+                        childCount: 50,
+                      ),
+                    ),
+                  ]
+                ],
+              );
+            },
           ),
         ],
       ),
@@ -95,7 +102,6 @@ class ProjectsCollection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
 
     final width = min(
       MediaQuery.of(context).size.height / 2,
@@ -138,21 +144,7 @@ class ProjectsCollection extends StatelessWidget {
                         case ProjectStatus.success:
                           if (state.projects == null ||
                               state.projects!.isEmpty) {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                InformationCard(
-                                  type: StatusType.neutral,
-                                  title:
-                                      "Looks like you don't have any projects yet",
-                                  bottomButton: InformationButton(
-                                    text: "Create new project",
-                                    icon: null,
-                                    onPressed: () {},
-                                  ),
-                                ),
-                              ],
-                            );
+                            return CreateProjectWidget();
                           }
                           return CustomCarousel(
                             itemCountAfter: 1,
@@ -164,8 +156,9 @@ class ProjectsCollection extends StatelessWidget {
                             physics: PageScrollPhysics(),
                             onSelectedItemChanged: (i) {
                               context.read<ProjectBloc>().add(
-                                ProjectSelected(project: state.projects![i]),
-                              );
+                                    ProjectSelected(
+                                        project: state.projects![i]),
+                                  );
                             },
                             effectsBuilder: (_, ratio, child) {
                               double o = (ratio * -1 + 0.5) * pi;

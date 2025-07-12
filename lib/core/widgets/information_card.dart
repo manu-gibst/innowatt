@@ -158,22 +158,23 @@ class InformationButton {
   final VoidCallback onPressed;
 
   Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: onPressed,
-      style: FilledButton.styleFrom(
-        backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-        foregroundColor: Theme.of(context).colorScheme.primary,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(borderRadius),
-            bottomRight: Radius.circular(borderRadius),
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
+          foregroundColor: Theme.of(context).colorScheme.primary,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(borderRadius),
+              bottomRight: Radius.circular(borderRadius),
+            ),
           ),
         ),
+        child: icon == null ? Text(text) : Row(children: [Text(text), icon!]),
       ),
-      child: icon == null
-          ? Center(child: Text(text))
-          : Row(children: [Text(text), icon!]),
     );
   }
 }
