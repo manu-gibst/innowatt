@@ -6,40 +6,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innowatt/core/widgets/elevated_button.dart';
-import 'package:innowatt/core/widgets/information_card.dart';
 import 'package:innowatt/projects/create_project/cubit/create_project_cubit.dart';
 import 'package:projects_repository/projects_repository.dart';
 
 const outerBorderRadius = 40.0;
 
-class CreateProjectWidget extends StatelessWidget {
-  const CreateProjectWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        InformationCard(
-          type: StatusType.neutral,
-          title: "Looks like you don't have any projects yet",
-          bottomButton: InformationButton(
-            text: "Create new project",
-            icon: null,
-            onPressed: () {
-              showDialog(
-                barrierDismissible: false,
-                context: context,
-                builder: (context) {
-                  return CreateProjectDialog();
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+void showCreateProjectDialog(BuildContext context) {
+  showDialog(
+    barrierDismissible: false,
+    context: context,
+    builder: (context) {
+      return CreateProjectDialog();
+    },
+  );
 }
 
 class CreateProjectDialog extends StatelessWidget {
@@ -102,32 +81,31 @@ class _CreateProjectDialogWrapper extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: AbsorbPointer(
-            absorbing: state.status.isInProgressOrSuccess,
-            child: AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(outerBorderRadius),
-              ),
-              title: const Text("Create project"),
-              content: _ProjectNameInput(),
-              actions: [
-                BlurredElevatedButton(
-                  colorType: ColorType.surface,
-                  onPressed: context.pop,
-                  child: const Text(
-                    "Close",
-                    textAlign: TextAlign.end,
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: context.read<CreateProjectCubit>().createProject,
-                  style: customElevatedButtonStyle(context),
-                  child: const Text("CREATE"),
-                ),
-              ],
+        final colorScheme = Theme.of(context).colorScheme;
+        return AbsorbPointer(
+          absorbing: state.status.isInProgressOrSuccess,
+          child: AlertDialog(
+            backgroundColor: colorScheme.surfaceContainerHigh.withAlpha(255),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(outerBorderRadius),
             ),
+            title: const Text("Create project"),
+            content: _ProjectNameInput(),
+            actions: [
+              BlurredElevatedButton(
+                colorType: ColorType.surface,
+                onPressed: context.pop,
+                child: const Text(
+                  "Close",
+                  textAlign: TextAlign.end,
+                ),
+              ),
+              ElevatedButton(
+                onPressed: context.read<CreateProjectCubit>().createProject,
+                style: customElevatedButtonStyle(context),
+                child: const Text("CREATE"),
+              ),
+            ],
           ),
         );
       },

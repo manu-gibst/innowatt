@@ -8,7 +8,7 @@ import 'package:gap/gap.dart';
 import 'package:innowatt/core/widgets/information_card.dart';
 import 'package:innowatt/core/widgets/glowing_backlight.dart';
 import 'package:innowatt/projects/bloc/project_bloc.dart';
-import 'package:innowatt/projects/create_project/create_project_widget.dart';
+import 'package:innowatt/projects/create_project/create_project_dialog.dart';
 import 'package:innowatt/projects/view/blank_project_container.dart';
 import 'package:innowatt/projects/view/project_container.dart';
 import 'package:innowatt/projects/slider/page_slider.dart';

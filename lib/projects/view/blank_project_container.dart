@@ -3,7 +3,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:innowatt/core/widgets/elevated_button.dart';
-import 'package:innowatt/projects/create_project/create_project_widget.dart';
+import 'package:innowatt/projects/create_project/create_project_dialog.dart';
 import 'package:innowatt/projects/view/projects_screen.dart';
 
 class BlankProjectContainer extends StatelessWidget {
@@ -66,13 +66,7 @@ class BlankProjectContainer extends StatelessWidget {
                               colorType: ColorType.secondary,
                             ),
                             onPressed: () {
-                              showDialog(
-                                barrierDismissible: false,
-                                context: context,
-                                builder: (context) {
-                                  return CreateProjectDialog();
-                                },
-                              );
+                              showCreateProjectDialog(context);
                             },
                             child: const Text("CREATE"),
                           ),
