@@ -11,7 +11,7 @@ import 'package:innowatt/projects/bloc/project_bloc.dart';
 import 'package:innowatt/projects/create_project/create_project_widget.dart';
 import 'package:innowatt/projects/view/blank_project_container.dart';
 import 'package:innowatt/projects/view/project_container.dart';
-import 'package:innowatt/projects/view/project_slider_indicator.dart';
+import 'package:innowatt/projects/slider/page_slider.dart';
 import 'package:projects_repository/projects_repository.dart';
 
 const padding = 40.0;
@@ -49,7 +49,6 @@ class _ProjectsScreenWrapper extends StatelessWidget {
           ),
           BlocBuilder<ProjectBloc, ProjectState>(
             builder: (context, state) {
-              print(state.selectedIndex);
               return CustomScrollView(
                 physics: PageScrollPhysics(),
                 slivers: [
@@ -149,10 +148,10 @@ class ProjectsCollection extends StatelessWidget {
                         case ProjectStatus.failure:
                           return InformationCard(type: StatusType.error);
                         case ProjectStatus.success:
-                          if (state.projects == null ||
-                              state.projects!.isEmpty) {
-                            return CreateProjectWidget();
-                          }
+                          // if (state.projects == null ||
+                          //     state.projects!.isEmpty) {
+                          //   return CreateProjectWidget();
+                          // }
                           return CustomCarousel(
                             itemCountAfter: state.projects!.length > 1 ? 1 : 0,
                             itemCountBefore: state.projects!.length > 2 ? 1 : 0,
@@ -160,7 +159,7 @@ class ProjectsCollection extends StatelessWidget {
                             depthOrder: DepthOrder.selectedInFront,
                             scrollDirection: Axis.horizontal,
                             scrollSpeed: 0.4,
-                            loop: true,
+                            // loop: true,
                             physics: PageScrollPhysics(),
                             onSelectedItemChanged: (i) {
                               // There is an exception of blank project container.
@@ -188,17 +187,6 @@ class ProjectsCollection extends StatelessWidget {
                                 ),
                               );
                             },
-                            // children: [
-                            //   ProjectContainer(
-                            //       projectName: "projectName",
-                            //       completion: 0,
-                            //       active: true),
-                            //   BlankProjectContainer(),
-                            //   ProjectContainer(
-                            //       projectName: "projectName",
-                            //       completion: 0,
-                            //       active: true),
-                            // ]);
                             children: [
                               ...state.projects!.map<Widget>((project) {
                                 return ProjectContainer(
@@ -223,7 +211,7 @@ class ProjectsCollection extends StatelessWidget {
                       case ProjectStatus.failure:
                         return MaxGap(80);
                       case ProjectStatus.success:
-                        return ProjectSliderIndicator(
+                        return PageSlider(
                           count: state.projects!.length + 1,
                           selectedIndex:
                               state.selectedIndex ?? state.projects!.length,
