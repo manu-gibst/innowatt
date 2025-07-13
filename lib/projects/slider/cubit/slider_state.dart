@@ -39,14 +39,12 @@ final class SliderState extends Equatable {
     );
   }
 
-  /// Returns whether the left bound (first dot) should be visible.
-  bool leftBoundVisible() {
-    return left != 0;
+  bool leftReachedStart() {
+    return left == 0;
   }
 
-  /// Returns whether the right bound (first dot) should be visible.
-  bool rightBoundVisible() {
-    return right != size - 1;
+  bool rightReachedEnd() {
+    return right == size - 1;
   }
 
   @override

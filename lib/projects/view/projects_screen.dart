@@ -8,7 +8,6 @@ import 'package:gap/gap.dart';
 import 'package:innowatt/core/widgets/information_card.dart';
 import 'package:innowatt/core/widgets/glowing_backlight.dart';
 import 'package:innowatt/projects/bloc/project_bloc.dart';
-import 'package:innowatt/projects/create_project/create_project_dialog.dart';
 import 'package:innowatt/projects/view/blank_project_container.dart';
 import 'package:innowatt/projects/view/project_container.dart';
 import 'package:innowatt/projects/slider/page_slider.dart';
@@ -102,8 +101,27 @@ class _ProjectsScreenWrapper extends StatelessWidget {
   }
 }
 
-class ProjectsCollection extends StatelessWidget {
+class ProjectsCollection extends StatefulWidget {
   const ProjectsCollection({super.key});
+
+  @override
+  State<ProjectsCollection> createState() => _ProjectsCollectionState();
+}
+
+class _ProjectsCollectionState extends State<ProjectsCollection> {
+  late final CustomCarouselScrollController controller;
+
+  @override
+  void initState() {
+    controller = CustomCarouselScrollController(initialItem: 0);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,8 +154,17 @@ class ProjectsCollection extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Expanded(
-                  child: BlocBuilder<ProjectBloc, ProjectState>(
+                  child: BlocConsumer<ProjectBloc, ProjectState>(
+                    listenWhen: (previous, current) =>
+                        previous.projects?.length != current.projects?.length,
+                    listener: (context, state) {
+                      // Making sure that when new projects are added,
+                      // the controller stays on the selected project.
+                      controller.animateToItem(
+                          state.selectedIndex ?? state.projects!.length);
+                    },
                     builder: (context, state) {
+                      final projectBloc = context.read<ProjectBloc>();
                       switch (state.status) {
                         case ProjectStatus.initial:
                         case ProjectStatus.waiting:
@@ -148,10 +175,6 @@ class ProjectsCollection extends StatelessWidget {
                         case ProjectStatus.failure:
                           return InformationCard(type: StatusType.error);
                         case ProjectStatus.success:
-                          // if (state.projects == null ||
-                          //     state.projects!.isEmpty) {
-                          //   return CreateProjectWidget();
-                          // }
                           return CustomCarousel(
                             itemCountAfter: state.projects!.length > 1 ? 1 : 0,
                             itemCountBefore: state.projects!.length > 2 ? 1 : 0,
@@ -166,10 +189,10 @@ class ProjectsCollection extends StatelessWidget {
                               // If the selected project is blank - it is the last one.
                               final selectedIndex =
                                   i == state.projects!.length ? null : i;
-                              context
-                                  .read<ProjectBloc>()
+                              projectBloc
                                   .add(ProjectSelected(index: selectedIndex));
                             },
+                            controller: controller,
                             effectsBuilder: (_, ratio, child) {
                               double o = (ratio * -1 + 0.5) * pi;
                               double r = width * 0.4, x = r * cos(o);

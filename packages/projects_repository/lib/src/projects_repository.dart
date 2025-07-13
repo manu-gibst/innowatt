@@ -21,6 +21,7 @@ class ProjectsRepository {
         ],
         queryOrder: QueryOrder(orderField: 'updated_time'),
         pageSize: 20,
+        live: true,
       );
 
   final String _uid;

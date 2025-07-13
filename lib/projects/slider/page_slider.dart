@@ -33,13 +33,15 @@ class _PageSliderWrapper extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return BlocListener<ProjectBloc, ProjectState>(
       listenWhen: (previous, current) =>
-          previous.selectedIndex != current.selectedIndex,
+          previous.selectedIndex != current.selectedIndex ||
+          previous.projects?.length != current.projects?.length,
       listener: (context, state) {
         // Listening to changes from ProjectBloc
         // and invoking selected() function in SliderCubit
-        context
-            .read<SliderCubit>()
-            .onSelected(state.selectedIndex ?? state.projects!.length);
+        final sliderCubit = context.read<SliderCubit>();
+
+        sliderCubit.onSelected(state.selectedIndex ?? state.projects!.length);
+        sliderCubit.onSizeChanged((state.projects?.length ?? 0) + 1);
       },
       child: SizedBox(
         height: 80,
@@ -80,10 +82,10 @@ class _PageSliderWrapper extends StatelessWidget {
 
 extension on SliderState {
   bool shouldMinimize(int index) {
-    // Minimize if it is the right bound and not last element.
-    // Similar logic for left bound.
-    if (right == index && rightBoundVisible()) return true;
-    if (left == index && leftBoundVisible()) return true;
+    // Minimize if it is the right bound and it did not reach the end.
+    // Similar logic for the left bound.
+    if (right == index && !rightReachedEnd()) return true;
+    if (left == index && !leftReachedStart()) return true;
     return false;
   }
 }

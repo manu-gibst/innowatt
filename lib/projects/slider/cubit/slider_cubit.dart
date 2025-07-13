@@ -28,4 +28,10 @@ class SliderCubit extends Cubit<SliderState> {
       selectedIndex: index,
     ));
   }
+
+  void onSizeChanged(int newSize) {
+    emit(state.copyWith(
+      size: newSize,
+    ));
+  }
 }

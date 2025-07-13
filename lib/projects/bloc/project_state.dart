@@ -8,6 +8,11 @@ final class ProjectState extends Equatable {
     required this.projects,
     required this.status,
   });
+
+  /// Selected index. \
+  /// Important notice! If the selected index == null, it means that the
+  /// screen should be focused on the BlankProjectContainer, which is the
+  /// last element.
   final int? selectedIndex;
   final List<Project>? projects;
   final ProjectStatus status;
@@ -18,7 +23,7 @@ final class ProjectState extends Equatable {
   }
 
   ProjectState copyWith({
-    Object? selectedIndex,
+    Object? selectedIndex = _unset,
     List<Project>? projects,
     ProjectStatus? status,
   }) {
