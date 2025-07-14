@@ -37,7 +37,7 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
           return state.copyWith(
             status: ProjectStatus.success,
             projects: data,
-            selectedIndex: state.projects == null ? null : 0,
+            selectedIndex: data.isEmpty ? null : 0,
           );
         },
       );

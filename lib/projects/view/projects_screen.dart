@@ -157,10 +157,10 @@ class _ProjectsCollectionState extends State<ProjectsCollection> {
                   child: BlocConsumer<ProjectBloc, ProjectState>(
                     listenWhen: (previous, current) =>
                         previous.projects?.length != current.projects?.length,
-                    listener: (context, state) {
+                    listener: (context, state) async {
                       // Making sure that when new projects are added,
                       // the controller stays on the selected project.
-                      controller.animateToItem(
+                      await controller.animateToItem(
                           state.selectedIndex ?? state.projects!.length);
                     },
                     builder: (context, state) {
