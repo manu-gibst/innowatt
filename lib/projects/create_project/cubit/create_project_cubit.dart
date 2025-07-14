@@ -25,6 +25,7 @@ class CreateProjectCubit extends Cubit<CreateProjectState> {
 
   Future<void> createProject() async {
     if (!_validateAll()) return;
+    emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     try {
       await _projectsRepository.createProject(
         name: state.name.value,

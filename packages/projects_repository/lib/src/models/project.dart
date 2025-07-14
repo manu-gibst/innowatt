@@ -60,10 +60,14 @@ class Project {
     Timestamp? updatedTime,
   }) {
     return Project(
+      id: id,
       name: name ?? this.name,
       modulesCount: modulesCount ?? this.modulesCount,
       currentModule: currentModule ?? this.currentModule,
       updatedTime: updatedTime ?? this.updatedTime,
     );
   }
+
+  @override
+  String toString() => "Project($id) (name: $name)";
 }

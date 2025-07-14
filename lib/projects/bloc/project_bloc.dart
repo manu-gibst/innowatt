@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:innowatt/repository/chat_repository/src/exceptions/exception.dart';
 import 'package:projects_repository/projects_repository.dart'
     show ProjectsRepository, Project;
 
@@ -72,10 +73,16 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
   ) async {
     emit(state.copyWith(status: ProjectStatus.waiting));
     try {
+      print("in _onRenamed()");
+      print(state.selectedProject);
       final updatedProject = state.selectedProject!.copyWith(name: event.name);
       await _projectsRepository.updateProject(updatedProject: updatedProject);
       emit(state.copyWith(status: ProjectStatus.success));
-    } catch (_) {
+    } on FirestoreDatabaseFailure catch (e) {
+      print(e.message);
+      emit(state.copyWith(status: ProjectStatus.failure));
+    } catch (e) {
+      print(e);
       emit(state.copyWith(status: ProjectStatus.failure));
     }
   }

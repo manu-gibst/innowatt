@@ -129,7 +129,7 @@ class _ProjectNameInput extends StatelessWidget {
       textCapitalization: TextCapitalization.words,
       decoration: InputDecoration(
         border: OutlineInputBorder(),
-        labelText: 'project name',
+        labelText: 'Project name',
         hintText: 'My New Project',
         errorText: displayError?.text(),
       ),

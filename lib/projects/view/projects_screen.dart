@@ -8,6 +8,7 @@ import 'package:gap/gap.dart';
 import 'package:innowatt/core/widgets/information_card.dart';
 import 'package:innowatt/core/widgets/glowing_backlight.dart';
 import 'package:innowatt/projects/bloc/project_bloc.dart';
+import 'package:innowatt/projects/single_project/single_project_sliver.dart';
 import 'package:innowatt/projects/view/blank_project_container.dart';
 import 'package:innowatt/projects/view/project_container.dart';
 import 'package:innowatt/projects/slider/page_slider.dart';
@@ -40,6 +41,7 @@ class _ProjectsScreenWrapper extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           Align(
@@ -51,38 +53,22 @@ class _ProjectsScreenWrapper extends StatelessWidget {
               return CustomScrollView(
                 physics: PageScrollPhysics(),
                 slivers: [
-                  // TODO: FUCK THIS
-                  // Just make it so when you need to create a project
-                  // it will scroll down and create it there.
-                  // neofunctionality, multipurpose and shit.
-                  // go diva
-
-                  // If you forgot
-                  // --------------------------------------
-                  // if (state.selectedIndex == null)
-                  //   SliverToBoxAdapter(
-                  //     child: ProjectsCollection(),
-                  //   ),
-                  // --------------------------------------
-                  // For some reason Flutter refuses interactivity
-                  // if slivers has a single sliver like above.
-                  // Your task is to make sure that there are
-                  // always more than 1 slivers.
-                  // Good luck honey!
-                  if (true) ...[
+                  if (state.selectedIndex == null)
+                    SliverToBoxAdapter(
+                      child: ProjectsCollection(),
+                    ),
+                  if (state.selectedIndex != null) ...[
                     SliverToBoxAdapter(child: ProjectsCollection()),
-                    SliverAppBar(
-                      backgroundColor: colorScheme.primaryContainer,
-                      foregroundColor: colorScheme.onPrimaryContainer,
-                      centerTitle: true,
-                      title: Text("0"),
-                      pinned: true,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(20),
-                          bottomRight: Radius.circular(20),
-                        ),
-                      ),
+                    SliverToBoxAdapter(
+                      child: Container(),
+                    ),
+                    SingleProjectSliverAppBar(
+                      projectName: state.selectedProject!.name,
+                      onRenameProject: (value) {
+                        context
+                            .read<ProjectBloc>()
+                            .add(ProjectRenamed(name: value));
+                      },
                     ),
                     SliverList(
                       delegate: SliverChildBuilderDelegate(

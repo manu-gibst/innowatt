@@ -60,7 +60,7 @@ class ProjectsRepository {
       await _projects.doc(updatedProject.id!).update(updatedProject.toJson());
     } on FirebaseException catch (e) {
       throw FirestoreDatabaseFailure.fromCode(e.code);
-    } catch (_) {
+    } catch (e) {
       throw FirestoreDatabaseFailure();
     }
   }
