@@ -49,6 +49,8 @@ class _ProjectsScreenWrapper extends StatelessWidget {
             child: GlowingBacklight(colorScheme: colorScheme),
           ),
           BlocBuilder<ProjectBloc, ProjectState>(
+            buildWhen: (previous, current) =>
+                previous.selectedIndex != current.selectedIndex,
             builder: (context, state) {
               return CustomScrollView(
                 physics: PageScrollPhysics(),
@@ -63,6 +65,7 @@ class _ProjectsScreenWrapper extends StatelessWidget {
                       child: Container(),
                     ),
                     SingleProjectSliverAppBar(
+                      key: Key(state.selectedProject!.id!),
                       projectName: state.selectedProject!.name,
                       onRenameProject: (value) {
                         context

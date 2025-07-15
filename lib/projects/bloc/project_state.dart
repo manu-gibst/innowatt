@@ -38,11 +38,7 @@ final class ProjectState extends Equatable {
   static const _unset = Object();
 
   @override
-  List<Object?> get props => [
-        selectedIndex,
-        projects,
-        status,
-      ];
+  List<Object?> get props => [selectedIndex, projects, status];
 
   @override
   String toString() =>
