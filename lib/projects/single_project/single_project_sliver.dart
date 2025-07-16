@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
@@ -126,8 +125,8 @@ class _NameInput extends StatelessWidget {
   }
 }
 
-class SingleProjectSliver extends StatelessWidget {
-  const SingleProjectSliver({super.key});
+class SingleProjectSliverList extends StatelessWidget {
+  const SingleProjectSliverList({super.key});
 
   @override
   Widget build(BuildContext context) {

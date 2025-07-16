@@ -34,7 +34,6 @@ class RenameProjectCubit extends Cubit<RenameProjectState> {
   }
 
   Future<void> renameProject() async {
-    print("object");
     if (!_validateAll()) return;
 
     if (state.name.value == _initialName) {

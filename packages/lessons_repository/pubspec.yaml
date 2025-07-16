@@ -1,8 +1,8 @@
-name: projects_repository
-description: "Projects Repository."
+name: lessons_repository
+description: "Lessons repository."
 version: 0.0.1
-publish_to: none
 homepage:
+publish_to: none
 
 environment:
   sdk: ^3.7.2

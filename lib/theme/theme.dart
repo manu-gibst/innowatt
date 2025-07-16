@@ -219,7 +219,7 @@ class MaterialTheme {
       surfaceContainerHigh: Color.fromARGB(150, 53, 43, 43),
       surfaceContainerHighest: Color.fromARGB(150, 90, 73, 74),
       onSurface: Color(0xffa9a6a6),
-      onSurfaceVariant: Color.fromARGB(255, 141, 132, 136),
+      onSurfaceVariant: Color.fromARGB(255, 214, 212, 212),
       // Other Surface variations
       outline: Color(0xff978e93),
       shadow: Color(0xff000000),

@@ -891,6 +891,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
+  lessons_repository:
+    dependency: "direct main"
+    description:
+      path: "packages/lessons_repository"
+      relative: true
+    source: path
+    version: "0.0.1"
   lints:
     dependency: transitive
     description:

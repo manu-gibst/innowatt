@@ -33,7 +33,7 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
     emit(state.copyWith(status: ProjectStatus.waiting));
     try {
       return emit.forEach(
-        _projectsRepository.getProjectsStream(),
+        _projectsRepository.projectsStream(),
         onData: (data) {
           return state.copyWith(
             status: ProjectStatus.success,
@@ -73,16 +73,12 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
   ) async {
     emit(state.copyWith(status: ProjectStatus.waiting));
     try {
-      print("in _onRenamed()");
-      print(state.selectedProject);
       final updatedProject = state.selectedProject!.copyWith(name: event.name);
       await _projectsRepository.updateProject(updatedProject: updatedProject);
       emit(state.copyWith(status: ProjectStatus.success));
-    } on FirestoreDatabaseFailure catch (e) {
-      print(e.message);
+    } on FirestoreDatabaseFailure catch (_) {
       emit(state.copyWith(status: ProjectStatus.failure));
     } catch (e) {
-      print(e);
       emit(state.copyWith(status: ProjectStatus.failure));
     }
   }

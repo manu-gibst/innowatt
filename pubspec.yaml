@@ -41,6 +41,8 @@ dependencies:
     path: packages/ai_repository
   projects_repository:
     path: packages/projects_repository
+  lessons_repository:
+    path: packages/lessons_repository
   formz: ^0.8.0
   go_router: ^15.1.2
   font_awesome_flutter: ^10.8.0

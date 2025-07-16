@@ -26,6 +26,6 @@ final class ChatListState extends Equatable {
 
   @override
   String toString() {
-    return 'ChatListState { number of chats:${chats.length}, status: $status }';
+    return 'ChatListState { number of chats:${chats.length}, status: ${status.name} }';
   }
 }

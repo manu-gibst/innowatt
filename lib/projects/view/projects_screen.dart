@@ -2,11 +2,13 @@ import 'dart:math';
 
 import 'package:authentication_repository/authentication_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_custom_carousel/flutter_custom_carousel.dart';
 import 'package:gap/gap.dart';
 import 'package:innowatt/core/widgets/information_card.dart';
 import 'package:innowatt/core/widgets/glowing_backlight.dart';
+import 'package:innowatt/lessons/view/lessons_sliver_list.dart';
 import 'package:innowatt/projects/bloc/project_bloc.dart';
 import 'package:innowatt/projects/single_project/single_project_sliver.dart';
 import 'package:innowatt/projects/view/blank_project_container.dart';
@@ -56,14 +58,9 @@ class _ProjectsScreenWrapper extends StatelessWidget {
                 physics: PageScrollPhysics(),
                 slivers: [
                   if (state.selectedIndex == null)
-                    SliverToBoxAdapter(
-                      child: ProjectsCollection(),
-                    ),
+                    SliverToBoxAdapter(child: ProjectsCollection()),
                   if (state.selectedIndex != null) ...[
                     SliverToBoxAdapter(child: ProjectsCollection()),
-                    SliverToBoxAdapter(
-                      child: Container(),
-                    ),
                     SingleProjectSliverAppBar(
                       key: Key(state.selectedProject!.id!),
                       projectName: state.selectedProject!.name,
@@ -73,12 +70,7 @@ class _ProjectsScreenWrapper extends StatelessWidget {
                             .add(ProjectRenamed(name: value));
                       },
                     ),
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => const Text("data"),
-                        childCount: 50,
-                      ),
-                    ),
+                    LessonsSliverList(),
                   ]
                 ],
               );
@@ -202,13 +194,16 @@ class _ProjectsCollectionState extends State<ProjectsCollection> {
                             children: [
                               ...state.projects!.map<Widget>((project) {
                                 return ProjectContainer(
+                                  key: Key(
+                                      '__projectContainer_${project.id!}__'),
                                   projectName: project.name,
-                                  completion: project.currentModule /
-                                      project.modulesCount,
+                                  completion: project.completion,
                                   active: project == state.selectedProject,
                                 );
                               }),
-                              BlankProjectContainer(),
+                              BlankProjectContainer(
+                                key: Key('__blankProjectContainer__'),
+                              ),
                             ],
                           );
                       }

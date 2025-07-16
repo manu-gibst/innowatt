@@ -25,8 +25,13 @@ class Project {
 
   final String? id;
   final String name;
-  final int modulesCount;
   final int currentModule;
+
+  /// It is the **number of all learning modules**. \
+  /// Initially at project creation
+  /// it is null. It will be determined once user loads the single project
+  /// window, where the number of modules will become clear.
+  final int? modulesCount;
 
   @JsonKey(
     toJson: _firestoreTimestampToJson,
@@ -52,6 +57,9 @@ class Project {
       updatedTime: data?['updated_time'],
     );
   }
+
+  double get completion =>
+      modulesCount == null ? 0 : currentModule / modulesCount!;
 
   Project copyWith({
     String? name,
