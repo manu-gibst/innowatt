@@ -6,7 +6,12 @@ import 'package:innowatt/lessons/bloc/lessons_bloc.dart';
 import 'package:lessons_repository/lessons_repository.dart';
 
 class LessonsSliverList extends StatelessWidget {
-  const LessonsSliverList({super.key});
+  const LessonsSliverList({
+    super.key,
+    required this.controller,
+  });
+
+  final ScrollController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -16,13 +21,15 @@ class LessonsSliverList extends StatelessWidget {
       create: (context) => LessonsBloc(
         lessonsRepository: LessonsRepository(uid: uid),
       )..add(LessonsFetched()),
-      child: _LessonsSliverList(),
+      child: _LessonsSliverList(controller: controller),
     );
   }
 }
 
 class _LessonsSliverList extends StatelessWidget {
-  const _LessonsSliverList();
+  const _LessonsSliverList({required this.controller});
+
+  final ScrollController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +53,59 @@ class _LessonsSliverList extends StatelessWidget {
             ),
           );
         }
+        return SliverList.builder(
+          itemCount: state.lessons.length + 1,
+          itemBuilder: (context, index) {
+            if (index == state.lessons.length) {
+              // Adding extra space to fill remaining
+              final height = MediaQuery.of(context).size.height -
+                  kToolbarHeight -
+                  state.lessons.length * 100;
+              return Container(
+                height: height < 0 ? 0 : height,
+              );
+            }
+            final project = state.lessons[index];
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: colorScheme.surfaceContainerHigh,
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            project.name,
+                            style: textTheme.titleMedium!
+                                .copyWith(color: colorScheme.onSurfaceVariant),
+                          ),
+                          Text(
+                            project.description,
+                            style: textTheme.bodySmall!
+                                .copyWith(color: colorScheme.onSurface),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.check_circle_outline_rounded,
+                      size: 70,
+                      color: colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
         return SliverToBoxAdapter(
           child: Container(
             padding: const EdgeInsets.all(15),
@@ -90,28 +150,6 @@ class _LessonsSliverList extends StatelessWidget {
                               color: colorScheme.primary,
                             ),
                           ],
-                        ),
-                      ),
-                    );
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: ListTile(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                        minVerticalPadding: 20,
-                        minTileHeight: 70,
-                        tileColor: colorScheme.surfaceContainerHigh,
-                        title: Text(project.name),
-                        titleTextStyle: textTheme.titleMedium,
-                        titleAlignment: ListTileTitleAlignment.titleHeight,
-                        subtitle: Text(project.description),
-                        trailing: Icon(
-                          Icons.check_circle_outline_rounded,
-                          size: 70,
-                          color: colorScheme.primary,
                         ),
                       ),
                     );

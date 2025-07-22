@@ -35,8 +35,20 @@ class ProjectsScreen extends StatelessWidget {
   }
 }
 
-class _ProjectsScreenWrapper extends StatelessWidget {
+class _ProjectsScreenWrapper extends StatefulWidget {
   const _ProjectsScreenWrapper();
+
+  @override
+  State<_ProjectsScreenWrapper> createState() => _ProjectsScreenWrapperState();
+}
+
+class _ProjectsScreenWrapperState extends State<_ProjectsScreenWrapper> {
+  late final ScrollController _controller;
+  @override
+  void initState() {
+    _controller = ScrollController();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +67,7 @@ class _ProjectsScreenWrapper extends StatelessWidget {
                 previous.selectedIndex != current.selectedIndex,
             builder: (context, state) {
               return CustomScrollView(
+                controller: _controller,
                 physics: PageScrollPhysics(),
                 slivers: [
                   if (state.selectedIndex == null)
@@ -70,7 +83,7 @@ class _ProjectsScreenWrapper extends StatelessWidget {
                             .add(ProjectRenamed(name: value));
                       },
                     ),
-                    LessonsSliverList(),
+                    LessonsSliverList(controller: _controller),
                   ]
                 ],
               );
