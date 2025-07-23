@@ -24,6 +24,8 @@ class LessonsBloc extends Bloc<LessonsEvent, LessonsState> {
       await emit.forEach(
         _lessonsRepository.lessonsStream(),
         onData: (lessons) {
+          // Sorting the lessons by its id's
+          lessons.sort((a, b) => a.id.compareTo(b.id));
           return state.copyWith(
             status: LessonsStatus.success,
             lessons: lessons,

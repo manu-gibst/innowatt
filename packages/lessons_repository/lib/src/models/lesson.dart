@@ -20,7 +20,7 @@ class Lesson {
     required this.description,
     required this.updatedTime,
   });
-  final String id;
+  final int id;
   final String name;
   final String description;
 
@@ -40,7 +40,7 @@ class Lesson {
   ) {
     final data = snapshot.data();
     return Lesson(
-      id: snapshot.id,
+      id: int.tryParse(snapshot.id) ?? -1,
       name: data?['name'],
       description: data?['description'],
       updatedTime: data?['updated_time'],
