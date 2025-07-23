@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innowatt/app/bloc/app_bloc.dart';
+import 'package:innowatt/app/router/custom_navbar/cubit/custom_bottom_navbar_cubit.dart';
 import 'package:innowatt/app/router/page_transitions.dart';
 import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/app/view/app.dart';
@@ -11,8 +13,10 @@ import 'package:innowatt/auth/login/view/login_page.dart';
 import 'package:innowatt/auth/sign_up/view/sign_up_page.dart';
 import 'package:innowatt/chat/chat_list/view/all_chats_screen.dart';
 import 'package:innowatt/chat/single_user_chat/view/single_user_chat_screen.dart';
+import 'package:innowatt/core/widgets/custom_bottom_nav_bar.dart';
 import 'package:innowatt/projects/view/projects_screen.dart';
 part 'scaffold_with_navbar.dart';
+part 'custom_navbar/new_scaffold_with_navbar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -30,9 +34,45 @@ GoRouter router(AppBloc bloc) {
         path: Routes.signUp,
         builder: (context, state) => const SignUpPage(),
       ),
-      GoRoute(
-        path: Routes.projectRoutes.allProjects,
-        builder: (context, state) => const ProjectsScreen(),
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return BlocProvider(
+            create: (context) => CustomBottomNavbarCubit(),
+            child: _NewScaffoldWithNavbar(
+              navigationShell: navigationShell,
+            ),
+          );
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: 'INIMPLEMENTED',
+                builder: (context, state) => const Scaffold(
+                  body: Text('INIMPLEMENTED'),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.projectRoutes.allProjects,
+                builder: (context, state) => const ProjectsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: 'INIMPLEMENTED',
+                builder: (context, state) => const Scaffold(
+                  body: Text('INIMPLEMENTED'),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
