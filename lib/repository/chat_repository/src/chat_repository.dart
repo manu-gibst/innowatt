@@ -52,17 +52,18 @@ class ChatRepository {
     }
   }
 
-  void createSingleUserChat({
+  Future<void> createSingleUserChat({
     required String uid,
     required String chatName,
-  }) {
+    String? chatId,
+  }) async {
     final chat = Chat(
       name: chatName,
       uids: [uid],
       updatedTime: Timestamp.now(),
     );
     try {
-      _chatsCollection.doc().set(chat);
+      await _chatsCollection.doc(chatId).set(chat);
     } on FirebaseException catch (e) {
       throw FirestoreDatabaseFailure.fromCode(e.code);
     } catch (_) {

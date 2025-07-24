@@ -9,6 +9,55 @@ import 'package:innowatt/core/widgets/information_card.dart';
 import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
 import 'package:innowatt/repository/message_repository/message_repository.dart';
 
+class CreateOrOpenChatScreen extends StatelessWidget {
+  const CreateOrOpenChatScreen({
+    super.key,
+    required this.chatId,
+    required this.chatName,
+  });
+
+  final String chatId;
+  final String chatName;
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = context.read<AuthenticationRepository>().currentUser.id;
+    final chatRepository = ChatRepository(uid: uid);
+    return FutureBuilder(
+      future: chatRepository.getChat(chatId: chatId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const SizedBox(
+            width: 100,
+            height: 100,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (snapshot.data == null) {
+          return FutureBuilder(
+            future: chatRepository.createSingleUserChat(
+              uid: uid,
+              chatName: chatName,
+              chatId: chatId,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              return SingleUserChatScreen(chatId: chatId, chatName: chatName);
+            },
+          );
+        }
+        return SingleUserChatScreen(chatId: chatId, chatName: chatName);
+      },
+    );
+  }
+}
+
 class SingleUserChatScreen extends StatelessWidget {
   const SingleUserChatScreen({
     super.key,
@@ -58,7 +107,6 @@ class _SingleUserChatViewState extends State<SingleUserChatView> {
 
   @override
   void initState() {
-    // _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     _scrollController.addListener(_onScroll);
     super.initState();
   }

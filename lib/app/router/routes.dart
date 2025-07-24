@@ -14,4 +14,5 @@ final class ProjectRoutes {
 final class ChatRoutes {
   String get allChats => '/chats';
   String singleUserChat({required String chatId}) => '/chats/$chatId';
+  String createOrFetchChat({required String chatId, required String chatName}) => '/chats/create-or-fetch/$chatId/$chatName';
 }

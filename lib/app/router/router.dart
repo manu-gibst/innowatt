@@ -6,7 +6,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:innowatt/app/bloc/app_bloc.dart';
 import 'package:innowatt/app/router/custom_navbar/cubit/custom_bottom_navbar_cubit.dart';
-import 'package:innowatt/app/router/page_transitions.dart';
 import 'package:innowatt/app/router/routes.dart';
 import 'package:innowatt/app/view/app.dart';
 import 'package:innowatt/auth/login/view/login_page.dart';
@@ -33,6 +32,16 @@ GoRouter router(AppBloc bloc) {
       GoRoute(
         path: Routes.signUp,
         builder: (context, state) => const SignUpPage(),
+      ),
+      GoRoute(
+        builder: (context, state) => CreateOrOpenChatScreen(
+          chatId: state.pathParameters['chatId']!,
+          chatName: state.pathParameters['chatName']!,
+        ),
+        path: Routes.chatRoutes.createOrFetchChat(
+          chatId: ":chatId",
+          chatName: ':chatName',
+        ),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
