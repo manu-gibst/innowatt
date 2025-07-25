@@ -32,23 +32,32 @@ class App extends StatelessWidget {
   }
 }
 
-class AppView extends StatelessWidget {
+class AppView extends StatefulWidget {
   const AppView({super.key});
+
+  @override
+  State<AppView> createState() => _AppViewState();
+}
+
+class _AppViewState extends State<AppView> {
+  late GoRouter _router;
+
+  @override
+  void didChangeDependencies() {
+    _router = router(context.watch<AppBloc>());
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
     TextTheme textTheme = createTextTheme(context, "Montserrat", "Montserrat");
 
     MaterialTheme theme = MaterialTheme(textTheme);
-    // return MaterialApp(
-    //   theme: theme.dark(),
-    //   home: ThemeTester(),
-    // );
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Innowatt',
       theme: theme.dark(),
-      routerConfig: router(context.watch<AppBloc>()),
+      routerConfig: _router,
     );
   }
 }
