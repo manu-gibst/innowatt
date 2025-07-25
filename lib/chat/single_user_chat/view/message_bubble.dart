@@ -52,6 +52,8 @@ class _Bubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Container(
       margin: _getBubbleMargins(),
       alignment: onRight ? Alignment.topRight : Alignment.topLeft,
@@ -67,8 +69,8 @@ class _Bubble extends StatelessWidget {
         ),
         elevation: 2,
         color: onRight
-            ? Theme.of(context).colorScheme.primaryContainer
-            : Theme.of(context).colorScheme.secondaryContainer,
+            ? colorScheme.primaryContainer
+            : colorScheme.secondaryContainer,
         child: Padding(
           padding: onRight
               ? EdgeInsets.fromLTRB(15, 10, 20, 15)
@@ -79,7 +81,11 @@ class _Bubble extends StatelessWidget {
                 RichText(
                   text: TextSpan(
                     text: message.text,
-                    style: DefaultTextStyle.of(context).style,
+                    style: textTheme.bodyMedium!.copyWith(
+                      color: onRight
+                          ? colorScheme.onPrimaryContainer
+                          : colorScheme.onSecondaryContainer,
+                    ),
                     children: [
                       TextSpan(
                         text: ' ${message.createdAt!.time()}',
@@ -97,9 +103,9 @@ class _Bubble extends StatelessWidget {
                   right: 0,
                   child: Text(
                     message.createdAt!.time(),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.tertiary,
-                        ),
+                    style: textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ],

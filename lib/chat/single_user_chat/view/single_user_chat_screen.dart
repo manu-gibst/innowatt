@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:innowatt/chat/single_user_chat/bloc/messages_bloc.dart';
 import 'package:innowatt/chat/single_user_chat/view/chat_list_builder.dart';
+import 'package:innowatt/core/widgets/glowing_backlight.dart';
 import 'package:innowatt/core/widgets/information_card.dart';
 import 'package:innowatt/repository/chat_repository/src/chat_repository.dart';
 import 'package:innowatt/repository/message_repository/message_repository.dart';
@@ -117,9 +118,14 @@ class _SingleUserChatViewState extends State<SingleUserChatView> {
       appBar: AppBar(
         title: Text(widget.chatName),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
+          Align(
+            alignment: Alignment(3, 1.6),
+            child: GlowingBacklight(colorScheme: Theme.of(context).colorScheme),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
             child: _MessagesBuilder(scrollController: _scrollController),
           ),
           _buildSendContainer(context),
@@ -132,7 +138,8 @@ class _SingleUserChatViewState extends State<SingleUserChatView> {
     return Align(
       alignment: Alignment(0, 1),
       child: Container(
-        width: MediaQuery.of(context).size.width,
+        width: double.infinity,
+        height: kBottomNavigationBarHeight,
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         child: Row(
           mainAxisSize: MainAxisSize.min,
